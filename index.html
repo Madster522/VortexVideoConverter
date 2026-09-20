@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Vortex Video Converter — Turn videos into Vortex Part screens</title>
+<meta name="description" content="Convert videos into animated Vortex Part screens locally in your browser. High-quality scaling, anti-flicker, automatic Vortex settings, smart compression, and a built-in end credit." />
+<meta name="theme-color" content="#070a0f" />
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#070a0f;--panel:#101722;--panel2:#151e2c;--border:#2a3850;--text:#f5f8fc;--muted:#9fb0c6;
+  --accent:#4aa8ff;--accent2:#7a6cff;--good:#5bd79d;--warn:#ffd166;--bad:#ff7b7b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0b1220,#070a0f 42%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+.app{width:min(980px,94vw);margin:24px auto 48px}
+.hero{text-align:center;margin-bottom:18px}
+.hero h1{margin:0;font-size:clamp(30px,5vw,48px);letter-spacing:-.04em}
+.hero p{margin:8px auto 0;color:var(--muted);max-width:720px;line-height:1.45}
+.local{display:inline-block;margin-top:10px;border:1px solid var(--border);background:#0d1521;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfe4fa}
+.card{background:rgba(16,23,34,.96);border:1px solid var(--border);border-radius:18px;padding:16px;margin-top:14px}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:12px}.num{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--accent);color:#06101a;font-weight:900}.step h2{margin:0;font-size:16px}.step span{color:var(--muted);font-size:12px;margin-left:auto}
+.drop{position:relative;border:2px dashed #465b78;border-radius:16px;padding:28px 18px;text-align:center;background:#0b111a;cursor:pointer;transition:.15s}.drop.drag{border-color:var(--accent);background:#0e1b2a}.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}.drop strong{display:block;font-size:19px}.drop small{display:block;margin-top:7px;color:var(--muted)}.fileline{margin-top:10px;font-size:12px;color:#d2deec;overflow-wrap:anywhere}
+.quickgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:#c2cfdf}.field select,.field input[type=number]{width:100%;border:1px solid var(--border);background:#0a1019;color:var(--text);border-radius:11px;padding:10px 11px;outline:none}.field select:focus,.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,168,255,.13)}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}.pill{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}.pill b{display:block;font-size:12px}.pill span{display:block;color:var(--muted);font-size:11px;margin-top:4px}.pill.load-low{border-color:#2f6d51}.pill.load-low b{color:var(--good)}.pill.load-medium{border-color:#7a6835}.pill.load-medium b{color:var(--warn)}.pill.load-high{border-color:#82523a}.pill.load-high b{color:#ffac72}.pill.load-very{border-color:#7b3b44}.pill.load-very b{color:var(--bad)}
+.primary{width:100%;border:0;border-radius:13px;padding:13px 16px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;cursor:pointer;min-height:48px}.primary:disabled{opacity:.45;cursor:not-allowed}.secondary{border:1px solid var(--border);border-radius:11px;padding:10px 12px;background:#172232;color:#e7eef7;font-weight:800;cursor:pointer}.secondary:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.actions .primary{grid-column:1/-1}
+.status{margin-top:10px;border:1px solid var(--border);background:#0a0f17;border-radius:11px;padding:10px 12px;font-size:12px;color:#cad7e6;min-height:40px}.progress{height:8px;border:1px solid #223047;border-radius:999px;background:#080c12;overflow:hidden;margin-top:9px}.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .08s}
+.previewbox{background:#030507;border:7px solid #202b3b;border-radius:16px;padding:9px;display:grid;place-items:center;min-height:320px}.previewbox canvas{width:100%;height:auto;max-height:520px;object-fit:contain;image-rendering:pixelated;background:#000}.transport{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;margin-top:10px}.transport button{min-width:46px}.transport input{width:100%}.transport .time{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:100px;text-align:right}
+details{border:1px solid var(--border);border-radius:13px;background:#0b1119;margin-top:10px;overflow:hidden}details summary{cursor:pointer;padding:12px 13px;font-size:13px;font-weight:850;list-style:none}details summary::-webkit-details-marker{display:none}.inside{padding:0 13px 13px}.advanced-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.check{display:flex;align-items:center;gap:8px;font-size:12px;color:#ccd7e5;margin-top:9px}.check input{width:16px;height:16px}
+.help{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.help div{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:11px;font-size:12px;line-height:1.4}.help b{display:block;margin-bottom:4px}.help span{color:var(--muted)}
+.success{display:none;border:1px solid #2f6d51;background:#0f241c;border-radius:13px;padding:12px;margin-top:11px}.success.show{display:block}.success strong{display:block;color:#c9ffe6}.success small{display:block;color:#9fd9bd;margin-top:3px}
+textarea{width:100%;min-height:160px;background:#070b11;color:#dce8f6;border:1px solid var(--border);border-radius:10px;padding:10px;font:11px/1.45 ui-monospace,Consolas,monospace;resize:vertical}
+.hidden{display:none!important}video{display:none}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:4px 0 14px;border-bottom:1px solid rgba(159,176,198,.14);margin-bottom:22px}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.02em}.brandmark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:1000;box-shadow:0 8px 26px rgba(74,168,255,.18)}.nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.nav a{color:#c6d4e6;text-decoration:none;font-size:12px;font-weight:800;padding:7px 9px;border-radius:9px}.nav a:hover{background:#121c2a;color:#fff}.version{display:inline-flex;align-items:center;gap:6px;margin-left:5px;font-size:10px;color:#9fc8f3;border:1px solid #29405a;border-radius:999px;padding:3px 7px;background:#0b1520}.hero .tagline{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:13px}.tag{font-size:11px;font-weight:800;border:1px solid var(--border);padding:6px 9px;border-radius:999px;background:#0d1521;color:#cfe4fa}.newtag{border-color:#2f6d51;color:#bdf6d8;background:#0d1d17}.section-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#7f9bbd;font-weight:900;margin-bottom:6px}.release{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 0;border-top:1px solid rgba(159,176,198,.12)}.release:first-of-type{border-top:0}.release-badge{min-width:70px;height:max-content;border:1px solid var(--border);border-radius:10px;padding:7px 8px;text-align:center;background:#0c131e;font-size:11px;font-weight:900;color:#d8e8fa}.release h3{margin:0 0 5px;font-size:14px}.release p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.credit-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.credit-panel{border:1px solid var(--border);background:var(--panel2);border-radius:14px;padding:14px}.credit-panel h3{margin:0 0 8px;font-size:14px}.credit-panel p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.endcard-demo{aspect-ratio:16/9;background:radial-gradient(circle at 50% 25%,#16314a,#06090e 62%);border:1px solid #31445e;border-radius:12px;display:grid;place-items:center;text-align:center;padding:10px;font-weight:950;letter-spacing:-.02em}.endcard-demo small{display:block;color:#8cb7dc;font-size:10px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px}.site-footer{margin-top:22px;padding:18px 4px 8px;border-top:1px solid rgba(159,176,198,.14);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#8092a9;font-size:11px}.site-footer b{color:#b9c9dc}.notice{border-left:3px solid var(--accent);background:#0b1420;padding:10px 12px;border-radius:8px;color:#b9c9dc;font-size:11px;line-height:1.5;margin-top:10px}.credit-lock{display:flex;align-items:center;gap:9px;border:1px solid #315272;background:#0b1724;padding:10px 11px;border-radius:11px;margin-top:9px;font-size:12px;color:#d9ebff}.credit-lock strong{color:#fff}.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(91,215,157,.1);flex:0 0 auto}
+@media(max-width:720px){.summary{grid-template-columns:1fr 1fr}.summary .pill:last-child{grid-column:1/-1}.topbar{align-items:flex-start}.nav{display:none}.credit-grid{grid-template-columns:1fr}.quickgrid,.advanced-grid,.help{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.actions .primary{grid-column:auto}.transport{grid-template-columns:auto 1fr}.transport .time{grid-column:1/-1;text-align:left}.step span{display:none}.previewbox{min-height:220px}}
+
+
+/* V4.2 VISUAL POLISH */
+body{
+  min-height:100%;
+  background:
+    radial-gradient(circle at 16% -8%,rgba(74,168,255,.17),transparent 34%),
+    radial-gradient(circle at 88% 2%,rgba(122,108,255,.14),transparent 30%),
+    linear-gradient(180deg,#0b1220 0%,#080c13 42%,#06080d 100%);
+  background-attachment:fixed;
+}
+.app{width:min(1040px,94vw);margin:22px auto 52px}
+.topbar{
+  padding:7px 2px 16px;
+  margin-bottom:26px;
+  border-bottom:1px solid rgba(159,176,198,.16);
+}
+.brand{font-size:14px}
+.brandmark{
+  width:38px;height:38px;border-radius:12px;
+  box-shadow:0 10px 34px rgba(74,168,255,.25),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.version{background:rgba(10,21,34,.8);border-color:#35506d;color:#b9dcff}
+.nav a{transition:background .15s ease,color .15s ease,transform .15s ease}
+.nav a:hover{background:#152235;color:#fff;transform:translateY(-1px)}
+.hero{margin:4px auto 24px;max-width:860px}
+.hero h1{
+  font-size:clamp(34px,5vw,54px);
+  line-height:1.02;
+  letter-spacing:-.048em;
+  text-wrap:balance;
+  background:linear-gradient(180deg,#fff 22%,#d9e9fb 72%,#9ec6ef 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{font-size:14px;line-height:1.6;color:#a9bad0}
+.section-kicker{color:#83b9ec}
+.tag,.local{
+  background:rgba(13,21,33,.8);
+  border-color:#31445d;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.card{
+  position:relative;
+  background:linear-gradient(180deg,rgba(18,27,40,.98),rgba(13,20,30,.98));
+  border:1px solid rgba(74,98,130,.72);
+  border-radius:20px;
+  padding:18px;
+  margin-top:16px;
+  box-shadow:0 18px 50px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.025);
+}
+.card::before{
+  content:"";position:absolute;left:18px;right:18px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(116,185,255,.18),transparent);
+  pointer-events:none;
+}
+.step{margin-bottom:14px}
+.num{
+  width:30px;height:30px;
+  background:linear-gradient(135deg,#5cb5ff,#756dff);
+  color:#fff;
+  box-shadow:0 6px 18px rgba(74,168,255,.2),inset 0 1px 0 rgba(255,255,255,.26);
+}
+.step h2{font-size:17px;letter-spacing:-.015em}
+.drop{
+  border-color:#4b6688;
+  border-radius:18px;
+  padding:34px 20px;
+  background:
+    linear-gradient(180deg,rgba(15,24,36,.95),rgba(9,15,23,.96)),
+    radial-gradient(circle at 50% 0%,rgba(74,168,255,.1),transparent 60%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  transition:border-color .16s ease,background .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+.drop:hover{border-color:#6697c9;transform:translateY(-1px);box-shadow:0 10px 26px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.03)}
+.drop.drag{border-color:#69b9ff;background:#0e1d2c;box-shadow:0 0 0 4px rgba(74,168,255,.09)}
+.drop strong{font-size:20px;letter-spacing:-.02em}
+.quickgrid{gap:14px}
+.field label{font-weight:750;color:#d0dbea}
+.field select,.field input[type=number]{
+  min-height:43px;
+  border-color:#31435c;
+  background:linear-gradient(180deg,#0d1520,#09111a);
+  border-radius:12px;
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.field select:hover,.field input[type=number]:hover{border-color:#405b7b}
+.field select option{background:#ffffff;color:#111827}
+.summary{gap:10px}
+.pill{
+  min-height:64px;
+  background:linear-gradient(180deg,#172235,#111b29);
+  border-color:#30445f;
+  border-radius:14px;
+  padding:11px 12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.pill b{font-size:12px;color:#edf6ff}.pill span{line-height:1.35}
+.primary,.secondary{transition:transform .14s ease,filter .14s ease,border-color .14s ease,background .14s ease,box-shadow .14s ease}
+.primary{
+  border-radius:14px;
+  background:linear-gradient(135deg,#4aa8ff 0%,#6e79ff 52%,#7b68ff 100%);
+  box-shadow:0 10px 26px rgba(74,168,255,.18),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.primary:not(:disabled):hover{transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 13px 30px rgba(74,168,255,.24),inset 0 1px 0 rgba(255,255,255,.22)}
+.primary:not(:disabled):active,.secondary:not(:disabled):active{transform:translateY(0)}
+.secondary{background:linear-gradient(180deg,#1a283b,#142132);border-color:#344a66}
+.secondary:not(:disabled):hover{transform:translateY(-1px);background:#1b2b40;border-color:#4c6788}
+.status{background:#091019;border-color:#293c55;border-radius:12px;line-height:1.45}
+.progress{height:9px;border-color:#283a52;background:#060a10}
+.progress div{box-shadow:0 0 16px rgba(74,168,255,.45)}
+.previewbox{
+  border:1px solid #324760;
+  outline:7px solid #111a27;
+  border-radius:15px;
+  margin:7px;
+  padding:10px;
+  background:linear-gradient(180deg,#020305,#05080d);
+  box-shadow:0 18px 40px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.02);
+}
+.previewbox canvas{border-radius:7px}
+.transport{margin-top:14px}
+details{background:linear-gradient(180deg,#0d151f,#0a1119);border-color:#2d4059;border-radius:14px}
+details summary{padding:13px 14px;color:#dbe8f6;transition:background .15s ease}
+details summary:hover{background:rgba(74,168,255,.045)}
+.help{gap:10px}.help div,.credit-panel{
+  background:linear-gradient(180deg,#172235,#121b29);
+  border-color:#30445f;
+  border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.release{padding:14px 0}.release-badge{background:#101a28;border-color:#334862}
+.endcard-demo{border-color:#3b5674;box-shadow:inset 0 0 40px rgba(74,168,255,.05)}
+textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
+.success{background:linear-gradient(180deg,#10281f,#0b1f18);border-color:#347a5b}
+.site-footer{padding-top:20px}
+::selection{background:rgba(74,168,255,.3);color:#fff}
+@media(max-width:720px){
+  .app{width:min(95vw,1040px);margin-top:14px}
+  .card{padding:15px;border-radius:17px}
+  .hero{margin-bottom:18px}
+  .hero h1{font-size:clamp(32px,11vw,46px)}
+  .drop{padding:26px 16px}
+  .previewbox{margin:5px;outline-width:5px}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="topbar">
+    <div class="brand"><div class="brandmark">V</div><div>Vortex Video Converter <span class="version">v4.2</span></div></div>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="#convert">Convert</a><a href="#preview">Preview</a><a href="#updates">Updates</a><a href="#credits">Credits</a>
+    </nav>
+  </div>
+  <header class="hero">
+    <div class="section-kicker">Video → animated Part screen</div>
+    <h1>Vortex Video Converter</h1>
+    <p>Turn almost any browser-playable video into a compressed animated Vortex Part screen. Auto Vortex picks the settings, HQ scaling keeps detail, and every export ends with a built-in creator credit.</p>
+    <div class="tagline"><span class="tag newtag">NEW · V4 quality engine</span><span class="tag">Local processing</span><span class="tag">Smart compression</span><span class="tag">16.7M colors</span></div>
+    <div class="local">Your video stays on your device · nothing is uploaded</div>
+  </header>
+
+  <section class="card" id="convert">
+    <div class="step"><div class="num">1</div><h2>Choose your video</h2><span id="sourceInfo">No video selected</span></div>
+    <div class="drop" id="dropZone">
+      <input id="fileInput" type="file" accept="video/*" />
+      <strong>Click here or drop a video</strong>
+      <small>MP4, WebM, MOV, and other formats your browser can play</small>
+      <div class="fileline" id="fileLine">No file selected</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step"><div class="num">2</div><h2>Choose quality</h2><span id="autoChoiceLabel">Auto Vortex analyzes the clip</span></div>
+    <div class="quickgrid">
+      <div class="field">
+        <label for="qualitySelect">Quality preset</label>
+        <select id="qualitySelect">
+          <option value="auto" selected>Auto Vortex · easiest + best balance</option>
+          <option value="fast">Fast · fewer Parts</option>
+          <option value="recommended">Recommended · clear + smooth</option>
+          <option value="better">Better detail</option>
+          <option value="high">High detail · heavier</option>
+          <option value="ultra">Ultra · VERY LAGGY · short clips only</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fpsInput">Video FPS</label>
+        <input id="fpsInput" type="number" min="0.001" step="0.001" value="18" />
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="pill"><b id="resolutionSummary">Auto</b><span>16.7M-color Part screen</span></div>
+      <div class="pill"><b id="partsSummary">1,792</b><span>Parts</span></div>
+      <div class="pill"><b id="framesSummary">—</b><span>Frames</span></div>
+      <div class="pill"><b id="durationSummary">—</b><span>Video length</span></div>
+      <div class="pill"><b id="estimateSummary">—</b><span>Estimated convert time</span></div>
+      <div class="pill load-low" id="loadPill"><b id="loadSummary">Low</b><span id="loadDetail">Vortex load</span></div>
+    </div>
+
+    <details>
+      <summary>Advanced settings (optional)</summary>
+      <div class="inside">
+        <div class="advanced-grid">
+          <div class="field"><label>Width in Parts</label><input id="widthInput" type="number" min="4" max="160" step="1" value="64" /></div>
+          <div class="field"><label>Height in Parts</label><input id="heightInput" type="number" min="4" max="120" step="1" value="36" /></div>
+          <div class="field"><label>Max frames (0 = all)</label><input id="frameLimitInput" type="number" min="0" step="1" value="0" /></div>
+          <div class="field"><label>Start at seconds</label><input id="startInput" type="number" min="0" step="0.01" value="0" /></div>
+          <div class="field"><label>Length (0 = rest)</label><input id="durationInput" type="number" min="0" step="0.01" value="0" /></div>
+          <div class="field"><label>Fit</label><select id="fitInput"><option value="cover">Fill screen / crop</option><option value="contain">Show whole video</option><option value="stretch">Stretch</option></select></div>
+          <div class="field"><label>Pixel size</label><input id="pixelSizeInput" type="number" min="0.03" max="10" step="0.01" value="0.35" /></div>
+          <div class="field"><label>World X</label><input id="worldXInput" type="number" step="0.1" value="0" /></div>
+          <div class="field"><label>World Y</label><input id="worldYInput" type="number" step="0.1" value="12" /></div>
+          <div class="field"><label>World Z</label><input id="worldZInput" type="number" step="0.1" value="0" /></div>
+          <div class="field"><label>Pixel depth</label><input id="depthInput" type="number" min="0.01" step="0.01" value="0.12" /></div>
+          <div class="field"><label>End credit length (seconds)</label><input id="creditDurationInput" type="number" min="0.5" max="8" step="0.25" value="2" /></div>
+        </div>
+        <label class="check"><input id="edgePreserveInput" type="checkbox" checked /> Edge-preserving scaling (sharper outlines and detail)</label>
+        <label class="check"><input id="antiFlickerInput" type="checkbox" checked /> Temporal anti-flicker (stabilizes near-identical pixels)</label>
+        <label class="check"><input id="sceneDetectInput" type="checkbox" checked /> Auto scene/detail detection (boosts detailed scenes and resets smoothing on scene cuts)</label>
+        <label class="check"><input id="motionSmoothInput" type="checkbox" checked /> Motion smoothing (reduces jumpy fast movement)</label>
+        <label class="check"><input id="ditherInput" type="checkbox" /> Dithering (optional; usually leave off for cleaner video)</label>
+        <label class="check"><input id="dedupeInput" type="checkbox" checked /> Compress duplicate frames</label>
+        <label class="check"><input id="frameInput" type="checkbox" checked /> Add black frame around the screen</label>
+        <label class="check"><input id="loopInput" type="checkbox" checked /> Loop video forever in Vortex</label>
+        <div class="credit-lock"><span class="dot"></span><div><strong>Built-in end card:</strong> every converted video ends with “Made with Vortex Video Converter”.</div></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="step"><div class="num">3</div><h2>Convert and download</h2><span>One click</span></div>
+    <button class="primary" id="convertBtn" disabled>Convert video to Vortex</button>
+    <button class="secondary hidden" id="cancelBtn" type="button" style="width:100%;margin-top:8px">Cancel</button>
+    <div class="status" id="status">Choose a video first.</div>
+    <div class="progress"><div id="progressBar"></div></div>
+
+    <div class="success" id="successBox">
+      <strong>Your Vortex script is ready.</strong>
+      <small id="successInfo">Download it, then paste/run it in Vortex.</small>
+    </div>
+    <div class="actions">
+      <button class="primary" id="downloadBtn" disabled>Download Vortex .lua</button>
+      <button class="secondary" id="previewBtn" disabled>Play preview</button>
+      <button class="secondary" id="copyBtn" disabled>Copy script</button>
+    </div>
+  </section>
+
+  <section class="card" id="preview">
+    <div class="step"><div class="num">✓</div><h2>Preview</h2><span id="previewInfo">Source preview</span></div>
+    <div class="previewbox"><canvas id="previewCanvas" width="720" height="405"></canvas><video id="sourceVideo" muted playsinline preload="metadata"></video></div>
+    <div class="transport">
+      <button class="secondary" id="transportBtn" disabled type="button">▶</button>
+      <input id="scrubber" type="range" min="0" max="0" step="1" value="0" disabled />
+      <div class="time" id="timeLabel">0 / 0 frames</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step"><div class="num">?</div><h2>How to use the result</h2></div>
+    <div class="help">
+      <div><b>1. Download</b><span>Click “Download Vortex .lua” after conversion.</span></div>
+      <div><b>2. Open Vortex</b><span>Create or open the script where you want the screen.</span></div>
+      <div><b>3. Paste/run it</b><span>The script creates the Part screen and plays the converted frames.</span></div>
+    </div>
+    <details>
+      <summary>Show generated script</summary>
+      <div class="inside"><textarea id="codeOutput" readonly placeholder="The generated Vortex script will appear here after conversion."></textarea></div>
+    </details>
+  </section>
+
+
+  <section class="card" id="updates">
+    <div class="section-kicker">Changelog</div>
+    <div class="step"><div class="num">↻</div><h2>Update log</h2><span>Vortex Video Converter v4.2</span></div>
+    <div class="release"><div class="release-badge">v4.2</div><div><h3>Scene-aware motion engine</h3><p>Added automatic scene/detail detection, motion smoothing for fast movement, and a live Vortex load meter that warns when settings may be laggy.</p></div></div>
+    <div class="release"><div class="release-badge">v4.0<br>Current</div><div><h3>Website + branded end cards</h3><p>New full website layout, navigation, changelog, credits, improved help text, versioning, and a required “Made with Vortex Video Converter” ending added to every export. The ending is generated as real pixel frames, so it works on the same Part screen as the video.</p></div></div>
+    <div class="release"><div class="release-badge">v3.2</div><div><h3>Higher quality video engine</h3><p>Added 24-bit color, gamma-correct supersampling, edge-preserving sharpening, temporal anti-flicker, and cleaner dark-scene handling.</p></div></div>
+    <div class="release"><div class="release-badge">v3.0</div><div><h3>Auto Vortex</h3><p>Automatic resolution and FPS selection based on video length, aspect ratio, and estimated Part-update workload. Added Fast, Recommended, Better, High, Ultra, and Custom modes.</p></div></div>
+    <div class="release"><div class="release-badge">v2.0</div><div><h3>Smart compression</h3><p>Added full-frame, run-length, delta-frame, and duplicate-frame compression so Vortex scripts can be much smaller while preserving timing.</p></div></div>
+    <div class="release"><div class="release-badge">v1.0</div><div><h3>First release</h3><p>Basic browser video sampling and Vortex Part-screen Lua export.</p></div></div>
+  </section>
+
+  <section class="card" id="credits">
+    <div class="section-kicker">Project</div>
+    <div class="step"><div class="num">★</div><h2>Credits</h2><span>Built for Vortex creators</span></div>
+    <div class="credit-grid">
+      <div class="credit-panel"><h3>Vortex Video Converter</h3><p>Created as a local browser tool for turning regular video into animated colored-Part screens for Vortex. Conversion, previewing, compression, and Lua generation all happen on your computer.</p><div class="notice">This converter is a community-created tool and is not presented as an official Vortex product. “Vortex” refers to the target creation platform.</div></div>
+      <div class="credit-panel"><h3>Export credit</h3><div class="endcard-demo"><div><small>Every export ends with</small>Made with<br>Vortex Video Converter</div></div></div>
+    </div>
+  </section>
+
+  <footer class="site-footer"><div><b>Vortex Video Converter v4.2</b> · Local-first video conversion</div><div>Made for Vortex creators · No upload required</div></footer>
+</main>
+<script>
+(() => {
+'use strict';
+
+const ALPHABET='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+const $=id=>document.getElementById(id);
+const fileInput=$('fileInput'),dropZone=$('dropZone'),fileLine=$('fileLine'),video=$('sourceVideo');
+const qualitySelect=$('qualitySelect'),widthInput=$('widthInput'),heightInput=$('heightInput'),fpsInput=$('fpsInput');
+const frameLimitInput=$('frameLimitInput'),startInput=$('startInput'),durationInput=$('durationInput'),fitInput=$('fitInput');
+const pixelSizeInput=$('pixelSizeInput'),worldXInput=$('worldXInput'),worldYInput=$('worldYInput'),worldZInput=$('worldZInput'),depthInput=$('depthInput'),creditDurationInput=$('creditDurationInput');
+const edgePreserveInput=$('edgePreserveInput'),antiFlickerInput=$('antiFlickerInput'),sceneDetectInput=$('sceneDetectInput'),motionSmoothInput=$('motionSmoothInput'),ditherInput=$('ditherInput'),dedupeInput=$('dedupeInput'),frameInput=$('frameInput'),loopInput=$('loopInput');
+const convertBtn=$('convertBtn'),cancelBtn=$('cancelBtn'),downloadBtn=$('downloadBtn'),previewBtn=$('previewBtn'),copyBtn=$('copyBtn');
+const status=$('status'),progressBar=$('progressBar'),successBox=$('successBox'),successInfo=$('successInfo'),codeOutput=$('codeOutput');
+const sourceInfo=$('sourceInfo'),resolutionSummary=$('resolutionSummary'),partsSummary=$('partsSummary'),framesSummary=$('framesSummary'),durationSummary=$('durationSummary'),loadSummary=$('loadSummary'),loadDetail=$('loadDetail'),loadPill=$('loadPill'),autoChoiceLabel=$('autoChoiceLabel');
+const previewInfo=$('previewInfo'),previewCanvas=$('previewCanvas'),previewCtx=previewCanvas.getContext('2d',{alpha:false});
+const transportBtn=$('transportBtn'),scrubber=$('scrubber'),timeLabel=$('timeLabel');
+const sampleCanvas=document.createElement('canvas'),sampleCtx=sampleCanvas.getContext('2d',{alpha:false,willReadFrequently:true});
+const hiCanvas=document.createElement('canvas'),hiCtx=hiCanvas.getContext('2d',{alpha:false,willReadFrequently:true});
+const creditCanvas=document.createElement('canvas'),creditCtx=creditCanvas.getContext('2d',{alpha:false,willReadFrequently:true});
+
+let objectUrl=null,loadedFile=null,frames=[],packets=[],generatedLua='';
+let converting=false,cancelRequested=false,previewRunning=false,previewRAF=0,previewStart=0,previewBaseFrame=0;
+let lastConverted={width:64,height:36,fps:18};
+let temporalPrevRGB=null,scenePrevRGB=null,motionPrevRGB=null;
+let sceneCutCount=0,detailBoostCount=0,motionSmoothCount=0;
+
+const presets={
+  fast:{w:40,fps:10},
+  recommended:{w:64,fps:15},
+  better:{w:80,fps:18},
+  high:{w:96,fps:20},
+  ultra:{w:120,fps:24}
+};
+
+function clamp(v,min,max,fallback){const n=Number(v);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback}
+function setStatus(msg,type='normal'){status.textContent=msg;status.style.color=type==='good'?'var(--good)':type==='warn'?'var(--warn)':type==='bad'?'var(--bad)':'#cad7e6'}
+function setProgress(v){progressBar.style.width=Math.max(0,Math.min(100,v))+'%'}
+function yieldUI(){return new Promise(r=>setTimeout(r,0))}
+function encodeNum(n,digits){let s='';for(let i=0;i<digits;i++){s=ALPHABET[n%64]+s;n=Math.floor(n/64)}return s}
+function safeName(name){return(name||'video').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'_')||'video'}
+
+const SRGB_TO_LINEAR=new Float32Array(256);
+for(let i=0;i<256;i++){const c=i/255;SRGB_TO_LINEAR[i]=c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}
+const LINEAR_TO_SRGB=new Uint8Array(4097);
+for(let i=0;i<=4096;i++){const c=i/4096;const s=c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055;LINEAR_TO_SRGB[i]=Math.max(0,Math.min(255,Math.round(s*255)))}
+function linearToByte(v){return LINEAR_TO_SRGB[Math.max(0,Math.min(4096,Math.round(v*4096)))]}
+function luminance(r,g,b){return 0.2126*r+0.7152*g+0.0722*b}
+
+function autoHeight(width){
+  const ratio=video.videoWidth&&video.videoHeight?video.videoHeight/video.videoWidth:9/16;
+  return Math.max(4,Math.min(120,Math.round(width*ratio)));
+}
+function autoVortexSettings(){
+  const dur=Number.isFinite(video.duration)?video.duration:0;
+  const aspect=video.videoWidth&&video.videoHeight?video.videoWidth/video.videoHeight:16/9;
+  let fps=18,targetUpdates=52000;
+  if(dur>180){fps=10;targetUpdates=28000}
+  else if(dur>90){fps=12;targetUpdates=34000}
+  else if(dur>45){fps=15;targetUpdates=42000}
+  else if(dur>20){fps=18;targetUpdates=50000}
+  else if(dur>8){fps=20;targetUpdates=60000}
+  else{fps=24;targetUpdates=72000}
+  const targetParts=Math.max(600,targetUpdates/fps);
+  let w=Math.sqrt(targetParts*Math.max(0.25,aspect));
+  w=Math.round(Math.max(40,Math.min(104,w)));
+  if(video.videoWidth)w=Math.min(w,Math.max(40,video.videoWidth));
+  const h=Math.max(4,Math.min(120,Math.round(w/Math.max(0.1,aspect))));
+  return{w,h,fps,updates:Math.round(w*h*fps)};
+}
+function applyPreset(name){
+  if(name==='custom')return;
+  if(name==='auto'){
+    const p=autoVortexSettings();
+    widthInput.value=p.w;heightInput.value=p.h;fpsInput.value=p.fps;
+    autoChoiceLabel.textContent=`Auto chose ${p.w}×${p.h} @ ${p.fps} FPS · ~${p.updates.toLocaleString()} pixel updates/sec`;
+    updateSummary();return;
+  }
+  const p=presets[name]||presets.recommended;
+  widthInput.value=p.w;heightInput.value=autoHeight(p.w);fpsInput.value=p.fps;
+  autoChoiceLabel.textContent='Manual quality preset';
+  updateSummary();
+}
+qualitySelect.addEventListener('change',()=>applyPreset(qualitySelect.value));
+ditherInput.addEventListener('change',updateSummary);
+[widthInput,heightInput,fpsInput,frameLimitInput,startInput,durationInput,creditDurationInput].forEach(el=>el.addEventListener('input',()=>{if(el===widthInput||el===heightInput||el===fpsInput){qualitySelect.value='custom';autoChoiceLabel.textContent='Custom settings'}updateSummary()}));
+
+function selectedTiming(){
+  const fps=Math.max(.001,Number(fpsInput.value)||12),dur=Number.isFinite(video.duration)?video.duration:0;
+  const start=Math.min(Math.max(0,Number(startInput.value)||0),Math.max(0,dur-.001));
+  const available=Math.max(0,dur-start),len=Math.max(0,Number(durationInput.value)||0),span=len>0?Math.min(len,available):available;
+  const natural=Math.max(0,Math.ceil(span*fps)),limit=Math.max(0,Math.floor(Number(frameLimitInput.value)||0));
+  return{fps,start,span,count:limit>0?Math.min(natural,limit):natural};
+}
+function getVortexLoad(width,height,fps){
+  const updates=width*height*fps;
+  if(updates<=32000)return{label:'Low',cls:'load-low',updates};
+  if(updates<=65000)return{label:'Medium',cls:'load-medium',updates};
+  if(updates<=105000)return{label:'High',cls:'load-high',updates};
+  return{label:'Very Laggy',cls:'load-very',updates};
+}
+function updatePerformanceMeter(width,height,fps){
+  const load=getVortexLoad(width,height,fps);
+  loadSummary.textContent=load.label;
+  loadDetail.textContent=`~${Math.round(load.updates/1000).toLocaleString()}k pixel updates/sec`;
+  loadPill.classList.remove('load-low','load-medium','load-high','load-very');
+  loadPill.classList.add(load.cls);
+}
+function formatEstimate(seconds){
+  if(!Number.isFinite(seconds)||seconds<=0)return '—';
+  if(seconds<10)return `${Math.max(1,Math.round(seconds))}s`;
+  if(seconds<60)return `${Math.round(seconds/5)*5}s`;
+  if(seconds<3600){const m=Math.floor(seconds/60),sec=Math.round((seconds-m*60)/10)*10;return sec>=60?`${m+1}m`:`${m}m ${sec}s`}
+  const h=Math.floor(seconds/3600),m=Math.round((seconds-h*3600)/60);return `${h}h ${m}m`;
+}
+function estimateConversion(width,height,count){
+  if(!count)return '—';
+  const pixels=width*height*count;
+  const quality=qualitySelect.value;
+  const qualityFactor={auto:1.10,fast:0.72,recommended:1.00,better:1.28,high:1.60,ultra:2.15,custom:1.10}[quality]||1;
+  const ditherFactor=ditherInput&&ditherInput.checked?1.18:1;
+  const factor=qualityFactor*ditherFactor;
+  const low=(count*0.015+pixels/2000000)*factor;
+  const high=(count*0.060+pixels/600000)*factor;
+  const a=formatEstimate(low),b=formatEstimate(Math.max(low*1.2,high));
+  return a===b?`≈ ${a}`:`≈ ${a}–${b}`;
+}
+
+function updateSummary(){
+  const w=Math.round(clamp(widthInput.value,4,160,64)),h=Math.round(clamp(heightInput.value,4,120,36));widthInput.value=w;heightInput.value=h;
+  const t=selectedTiming();resolutionSummary.textContent=`${w}×${h}`;partsSummary.textContent=(w*h).toLocaleString();framesSummary.textContent=t.count?t.count.toLocaleString():'—';
+  durationSummary.textContent=video.duration?`${video.duration.toFixed(2)}s`:'—';
+  estimateSummary.textContent=estimateConversion(w,h,t.count);
+  updatePerformanceMeter(w,h,t.fps);
+}
+
+function resetOutput(){
+  frames=[];packets=[];generatedLua='';codeOutput.value='';downloadBtn.disabled=true;previewBtn.disabled=true;copyBtn.disabled=true;transportBtn.disabled=true;scrubber.disabled=true;successBox.classList.remove('show');setProgress(0);stopPreview();
+}
+
+async function loadFile(file){
+  if(!file)return;resetOutput();loadedFile=file;if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(file);video.src=objectUrl;fileLine.textContent=file.name;sourceInfo.textContent='Loading…';setStatus('Reading video…');
+  try{await new Promise((resolve,reject)=>{const ok=()=>{cleanup();resolve()};const bad=()=>{cleanup();reject(new Error('Your browser could not open this video format.'))};const cleanup=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('error',bad)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('error',bad,{once:true});video.load()});
+    sourceInfo.textContent=`${video.videoWidth}×${video.videoHeight} · ${video.duration.toFixed(2)}s`;if(qualitySelect.value!=='custom')applyPreset(qualitySelect.value);else updateSummary();convertBtn.disabled=false;drawSourcePreview();setStatus('Ready. Press “Convert video to Vortex”.','good');
+  }catch(e){loadedFile=null;convertBtn.disabled=true;sourceInfo.textContent='Could not load';setStatus(e.message,'bad')}
+}
+fileInput.addEventListener('change',e=>loadFile(e.target.files&&e.target.files[0]));
+['dragenter','dragover'].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.add('drag')}));
+['dragleave','drop'].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.remove('drag')}));
+dropZone.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f)});
+
+function drawVideoToContext(ctx,canvas){
+  const sw=video.videoWidth,sh=video.videoHeight,dw=canvas.width,dh=canvas.height;if(!sw||!sh)return;ctx.fillStyle='#000';ctx.fillRect(0,0,dw,dh);
+  const fit=fitInput.value;let sx=0,sy=0,sww=sw,shh=sh,dx=0,dy=0,dww=dw,dhh=dh;
+  if(fit==='cover'){const sr=sw/sh,dr=dw/dh;if(sr>dr){sww=sh*dr;sx=(sw-sww)/2}else{shh=sw/dr;sy=(sh-shh)/2}}
+  else if(fit==='contain'){const scale=Math.min(dw/sw,dh/sh);dww=sw*scale;dhh=sh*scale;dx=(dw-dww)/2;dy=(dh-dhh)/2}
+  ctx.drawImage(video,sx,sy,sww,shh,dx,dy,dww,dhh);
+}
+function drawSourcePreview(){if(!video.videoWidth||frames.length)return;previewCanvas.width=720;previewCanvas.height=Math.max(220,Math.round(720*video.videoHeight/video.videoWidth));previewCtx.imageSmoothingEnabled=true;drawVideoToContext(previewCtx,previewCanvas);previewInfo.textContent='Source preview'}
+
+function seekVideo(t){return new Promise((resolve,reject)=>{if(Math.abs(video.currentTime-t)<.0005){resolve();return}const done=()=>{cleanup();resolve()};const fail=()=>{cleanup();reject(new Error('Could not seek through the video.'))};const cleanup=()=>{video.removeEventListener('seeked',done);video.removeEventListener('error',fail)};video.addEventListener('seeked',done,{once:true});video.addEventListener('error',fail,{once:true});video.currentTime=t})}
+
+// 24-bit RGB: true 8-bit red, green, and blue (16.7 million colors).
+// Four compact Base64-style characters store each pixel.
+const COLOR_DIGITS=4;
+function quantize24(r,g,b){
+  return Math.max(0,Math.min(255,Math.round(r)))*65536+
+         Math.max(0,Math.min(255,Math.round(g)))*256+
+         Math.max(0,Math.min(255,Math.round(b)));
+}
+function colorToken(v){return encodeNum(v,COLOR_DIGITS)}
+function tokenValue(frame,offset){let n=0;for(let i=0;i<COLOR_DIGITS;i++)n=n*64+Math.max(0,ALPHABET.indexOf(frame[offset+i]));return n}
+
+function chooseOversample(width,height){
+  if(!edgePreserveInput.checked)return 1;
+  const parts=width*height;
+  if(parts<=2500)return 4;
+  if(parts<=6000)return 3;
+  return 2;
+}
+
+function buildHighQualityRGB(width,height){
+  const scale=chooseOversample(width,height);
+  if(scale===1){
+    sampleCanvas.width=width;sampleCanvas.height=height;
+    sampleCtx.imageSmoothingEnabled=true;
+    if('imageSmoothingQuality' in sampleCtx)sampleCtx.imageSmoothingQuality='high';
+    drawVideoToContext(sampleCtx,sampleCanvas);
+    const d=sampleCtx.getImageData(0,0,width,height).data;
+    const rgb=new Uint8Array(width*height*3);
+    for(let p=0,i=0;p<width*height;p++,i+=4){rgb[p*3]=d[i];rgb[p*3+1]=d[i+1];rgb[p*3+2]=d[i+2]}
+    return rgb;
+  }
+
+  const hw=width*scale,hh=height*scale;
+  hiCanvas.width=hw;hiCanvas.height=hh;
+  hiCtx.imageSmoothingEnabled=true;
+  if('imageSmoothingQuality' in hiCtx)hiCtx.imageSmoothingQuality='high';
+  drawVideoToContext(hiCtx,hiCanvas);
+  const src=hiCtx.getImageData(0,0,hw,hh).data;
+  const base=new Float32Array(width*height*3);
+  const block=scale*scale;
+
+  // Gamma-correct supersampling preserves dark detail and bright points better.
+  for(let y=0;y<height;y++){
+    for(let x=0;x<width;x++){
+      let lr=0,lg=0,lb=0;
+      for(let oy=0;oy<scale;oy++){
+        let row=((y*scale+oy)*hw+x*scale)*4;
+        for(let ox=0;ox<scale;ox++){
+          const i=row+ox*4;
+          lr+=SRGB_TO_LINEAR[src[i]];lg+=SRGB_TO_LINEAR[src[i+1]];lb+=SRGB_TO_LINEAR[src[i+2]];
+        }
+      }
+      const p=(y*width+x)*3;
+      base[p]=linearToByte(lr/block);base[p+1]=linearToByte(lg/block);base[p+2]=linearToByte(lb/block);
+    }
+  }
+
+  if(!edgePreserveInput.checked)return Uint8Array.from(base);
+
+  // Edge-aware unsharp pass: strong local edges get more sharpening; flat regions stay clean.
+  const out=new Uint8Array(width*height*3);
+  for(let y=0;y<height;y++){
+    for(let x=0;x<width;x++){
+      const p=(y*width+x)*3;
+      let nr=0,ng=0,nb=0,n=0;
+      const neighbors=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]];
+      for(const [nx,ny] of neighbors){
+        if(nx<0||nx>=width||ny<0||ny>=height)continue;
+        const q=(ny*width+nx)*3;nr+=base[q];ng+=base[q+1];nb+=base[q+2];n++;
+      }
+      nr/=n||1;ng/=n||1;nb/=n||1;
+      const cr=base[p],cg=base[p+1],cb=base[p+2];
+      const edge=Math.min(1,Math.abs(luminance(cr,cg,cb)-luminance(nr,ng,nb))/34);
+      const amount=0.18+0.42*edge;
+      out[p]=Math.max(0,Math.min(255,Math.round(cr+(cr-nr)*amount)));
+      out[p+1]=Math.max(0,Math.min(255,Math.round(cg+(cg-ng)*amount)));
+      out[p+2]=Math.max(0,Math.min(255,Math.round(cb+(cb-nb)*amount)));
+    }
+  }
+  return out;
+}
+
+function analyzeSceneAndDetail(rgb,width,height){
+  if(!sceneDetectInput.checked){
+    scenePrevRGB=Uint8Array.from(rgb);
+    return{cut:false,detail:0,motion:0};
+  }
+  let grad=0,gradN=0,motion=0,motionN=0;
+  const step=(width*height>6500)?2:1;
+  for(let y=0;y<height;y+=step){
+    for(let x=0;x<width;x+=step){
+      const p=(y*width+x)*3;
+      const l=luminance(rgb[p],rgb[p+1],rgb[p+2]);
+      if(x+step<width){const q=(y*width+x+step)*3;grad+=Math.abs(l-luminance(rgb[q],rgb[q+1],rgb[q+2]));gradN++}
+      if(y+step<height){const q=((y+step)*width+x)*3;grad+=Math.abs(l-luminance(rgb[q],rgb[q+1],rgb[q+2]));gradN++}
+      if(scenePrevRGB&&scenePrevRGB.length===rgb.length){
+        const dr=rgb[p]-scenePrevRGB[p],dg=rgb[p+1]-scenePrevRGB[p+1],db=rgb[p+2]-scenePrevRGB[p+2];
+        motion+=Math.sqrt(dr*dr+dg*dg+db*db);motionN++;
+      }
+    }
+  }
+  const detail=grad/(gradN||1),avgMotion=motion/(motionN||1);
+  const cut=!!scenePrevRGB&&avgMotion>72;
+  scenePrevRGB=Uint8Array.from(rgb);
+  if(cut)sceneCutCount++;
+  return{cut,detail,motion:avgMotion};
+}
+
+function applyAdaptiveDetailBoost(rgb,width,height,metrics){
+  if(!sceneDetectInput.checked||metrics.cut||metrics.detail<10)return rgb;
+  const strength=Math.min(.28,Math.max(.06,(metrics.detail-10)/75));
+  if(strength<=.06)return rgb;
+  const out=new Uint8Array(rgb.length);
+  for(let y=0;y<height;y++){
+    for(let x=0;x<width;x++){
+      const p=(y*width+x)*3;
+      let ar=0,ag=0,ab=0,n=0;
+      if(x>0){const q=p-3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
+      if(x+1<width){const q=p+3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
+      if(y>0){const q=p-width*3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
+      if(y+1<height){const q=p+width*3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
+      ar/=n||1;ag/=n||1;ab/=n||1;
+      out[p]=Math.max(0,Math.min(255,Math.round(rgb[p]+(rgb[p]-ar)*strength)));
+      out[p+1]=Math.max(0,Math.min(255,Math.round(rgb[p+1]+(rgb[p+1]-ag)*strength)));
+      out[p+2]=Math.max(0,Math.min(255,Math.round(rgb[p+2]+(rgb[p+2]-ab)*strength)));
+    }
+  }
+  detailBoostCount++;
+  return out;
+}
+
+function applyMotionSmoothing(rgb,width,height,metrics){
+  if(!motionSmoothInput.checked||metrics.cut||!motionPrevRGB||motionPrevRGB.length!==rgb.length){
+    motionPrevRGB=Uint8Array.from(rgb);return rgb;
+  }
+  const out=new Uint8Array(rgb.length);
+  let used=false;
+  for(let i=0;i<rgb.length;i+=3){
+    const dr=rgb[i]-motionPrevRGB[i],dg=rgb[i+1]-motionPrevRGB[i+1],db=rgb[i+2]-motionPrevRGB[i+2];
+    const diff=Math.sqrt(dr*dr+dg*dg+db*db);
+    // Mild blend on real movement. Large scene cuts are handled above and never smeared.
+    let prevWeight=0;
+    if(diff>=38&&diff<85)prevWeight=.12;
+    else if(diff>=85&&diff<145)prevWeight=.08;
+    else if(diff>=145&&metrics.motion<68)prevWeight=.045;
+    if(prevWeight>0)used=true;
+    out[i]=Math.round(rgb[i]*(1-prevWeight)+motionPrevRGB[i]*prevWeight);
+    out[i+1]=Math.round(rgb[i+1]*(1-prevWeight)+motionPrevRGB[i+1]*prevWeight);
+    out[i+2]=Math.round(rgb[i+2]*(1-prevWeight)+motionPrevRGB[i+2]*prevWeight);
+  }
+  motionPrevRGB=Uint8Array.from(out);
+  if(used)motionSmoothCount++;
+  return out;
+}
+
+function applyTemporalAntiFlicker(rgb){
+  if(!antiFlickerInput.checked||!temporalPrevRGB||temporalPrevRGB.length!==rgb.length){
+    temporalPrevRGB=Uint8Array.from(rgb);return rgb;
+  }
+  const out=new Uint8Array(rgb.length);
+  for(let i=0;i<rgb.length;i+=3){
+    const dr=rgb[i]-temporalPrevRGB[i],dg=rgb[i+1]-temporalPrevRGB[i+1],db=rgb[i+2]-temporalPrevRGB[i+2];
+    const diff=Math.sqrt(dr*dr+dg*dg+db*db);
+    // Only stabilize tiny/medium changes. Large changes are motion and pass through immediately.
+    let keep=0;
+    if(diff<10)keep=0.58;
+    else if(diff<22)keep=0.40;
+    else if(diff<40)keep=0.18;
+    out[i]=Math.round(rgb[i]*(1-keep)+temporalPrevRGB[i]*keep);
+    out[i+1]=Math.round(rgb[i+1]*(1-keep)+temporalPrevRGB[i+1]*keep);
+    out[i+2]=Math.round(rgb[i+2]*(1-keep)+temporalPrevRGB[i+2]*keep);
+  }
+  temporalPrevRGB=Uint8Array.from(out);
+  return out;
+}
+
+function encodeCurrentFrame(width,height){
+  let rgb=buildHighQualityRGB(width,height);
+  const metrics=analyzeSceneAndDetail(rgb,width,height);
+  if(metrics.cut){temporalPrevRGB=null;motionPrevRGB=null}
+  rgb=applyAdaptiveDetailBoost(rgb,width,height,metrics);
+  rgb=applyMotionSmoothing(rgb,width,height,metrics);
+  rgb=applyTemporalAntiFlicker(rgb);
+  const out=new Array(width*height);
+  if(!ditherInput.checked){
+    for(let p=0;p<width*height;p++)out[p]=colorToken(quantize24(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
+    return out.join('');
+  }
+  // Optional dithering remains available, but 24-bit color usually makes it unnecessary.
+  const work=new Float32Array(rgb.length);for(let i=0;i<rgb.length;i++)work[i]=rgb[i];
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const p=y*width+x,k=p*3;
+    const r=Math.max(0,Math.min(255,Math.round(work[k]))),g=Math.max(0,Math.min(255,Math.round(work[k+1]))),b=Math.max(0,Math.min(255,Math.round(work[k+2])));
+    out[p]=colorToken(quantize24(r,g,b));
+    const er=work[k]-r,eg=work[k+1]-g,eb=work[k+2]-b;
+    const add=(nx,ny,f)=>{if(nx<0||nx>=width||ny<0||ny>=height)return;const q=(ny*width+nx)*3;work[q]+=er*f;work[q+1]+=eg*f;work[q+2]+=eb*f};
+    add(x+1,y,7/16);add(x-1,y+1,3/16);add(x,y+1,5/16);add(x+1,y+1,1/16);
+  }
+  return out.join('');
+}
+
+function encodeRGBArray(rgb,width,height){
+  const out=new Array(width*height);
+  for(let p=0;p<width*height;p++)out[p]=colorToken(quantize24(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
+  return out.join('');
+}
+
+function buildCreditFrame(width,height,fade=1){
+  creditCanvas.width=width;creditCanvas.height=height;
+  const ctx=creditCtx;
+  ctx.imageSmoothingEnabled=true;
+  const bg=ctx.createLinearGradient(0,0,width,height);
+  bg.addColorStop(0,'rgb(5,9,15)');bg.addColorStop(.55,'rgb(9,20,33)');bg.addColorStop(1,'rgb(7,10,16)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);
+
+  // Small V badge helps the end card stay recognizable even at low pixel resolutions.
+  const badge=Math.max(4,Math.round(Math.min(width,height)*0.18));
+  const bx=Math.round(width/2-badge/2),by=Math.max(1,Math.round(height*0.08));
+  ctx.globalAlpha=Math.max(0,Math.min(1,fade));
+  ctx.fillStyle='rgb(50,145,255)';ctx.fillRect(bx,by,badge,badge);
+  ctx.fillStyle='white';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`900 ${Math.max(3,Math.floor(badge*.72))}px Arial,sans-serif`;ctx.fillText('V',Math.round(width/2),by+badge/2+.2);
+
+  const maxTextWidth=Math.max(8,width-4);
+  const lines=['Made with','Vortex Video','Converter'];
+  let fontSize=Math.max(3,Math.floor(height*0.17));
+  ctx.font=`800 ${fontSize}px Arial,sans-serif`;
+  while(fontSize>3 && Math.max(...lines.map(t=>ctx.measureText(t).width))>maxTextWidth){fontSize--;ctx.font=`800 ${fontSize}px Arial,sans-serif`}
+  const lineH=Math.max(fontSize+1,Math.floor(height*.19));
+  const totalH=lineH*lines.length;
+  let cy=Math.max(by+badge+2,Math.round((height-totalH)/2)+Math.round(lineH*.55));
+  ctx.fillStyle='rgba(255,255,255,.96)';
+  for(let i=0;i<lines.length;i++){ctx.fillText(lines[i],Math.round(width/2),cy+i*lineH)}
+  ctx.globalAlpha=1;
+
+  const d=ctx.getImageData(0,0,width,height).data,rgb=new Uint8Array(width*height*3);
+  for(let p=0,i=0;p<width*height;p++,i+=4){rgb[p*3]=d[i];rgb[p*3+1]=d[i+1];rgb[p*3+2]=d[i+2]}
+  return encodeRGBArray(rgb,width,height);
+}
+
+function appendEndCredit(width,height,fps){
+  const seconds=clamp(creditDurationInput.value,.5,8,2);
+  const count=Math.max(1,Math.round(seconds*fps));
+  const fadeFrames=Math.min(Math.max(1,Math.round(fps*.22)),Math.floor(count/3));
+  const creditFrames=[];
+  // Quantized fade levels keep the outro compact after packet compression.
+  const levels=5;
+  for(let i=0;i<count;i++){
+    let fade=1;
+    if(i<fadeFrames)fade=(i+1)/fadeFrames;
+    else if(i>=count-fadeFrames)fade=(count-i)/fadeFrames;
+    fade=Math.max(.12,Math.min(1,Math.round(fade*levels)/levels));
+    creditFrames.push(buildCreditFrame(width,height,fade));
+  }
+  return creditFrames;
+}
+
+function decodeFrameToCanvas(frame,width,height){
+  previewCanvas.width=width;previewCanvas.height=height;const img=previewCtx.createImageData(width,height),pixelCount=width*height;
+  for(let p=0;p<pixelCount;p++){const v=tokenValue(frame,p*COLOR_DIGITS),r=Math.floor(v/65536),rem=v%65536,g=Math.floor(rem/256),b=rem%256,j=p*4;img.data[j]=r;img.data[j+1]=g;img.data[j+2]=b;img.data[j+3]=255}
+  previewCtx.putImageData(img,0,0)
+}
+
+function rleEncode(frame){let out='R',p=0,pixelCount=frame.length/COLOR_DIGITS;while(p<pixelCount){const o=p*COLOR_DIGITS,token=frame.slice(o,o+COLOR_DIGITS);let run=1;while(p+run<pixelCount&&frame.slice((p+run)*COLOR_DIGITS,(p+run+1)*COLOR_DIGITS)===token&&run<4095)run++;out+=token+encodeNum(run,2);p+=run}return out}
+function deltaEncode(prev,frame,indexDigits){let out='D',pixelCount=frame.length/COLOR_DIGITS;for(let p=0;p<pixelCount;p++){const o=p*COLOR_DIGITS,token=frame.slice(o,o+COLOR_DIGITS);if(token!==prev.slice(o,o+COLOR_DIGITS))out+=encodeNum(p,indexDigits)+token}return out}
+function fullBest(frame){const full='F'+frame,rle=rleEncode(frame);return rle.length<full.length?rle:full}
+function makePackets(rawFrames,width,height){
+  if(!rawFrames.length)return[];const indexDigits=width*height<=4096?2:3,out=[];let prev=null;
+  for(const frame of rawFrames){if(dedupeInput.checked&&prev!==null&&frame===prev&&out.length){out[out.length-1].ticks++;continue}let data;if(prev===null)data=fullBest(frame);else{const a=fullBest(frame),b=deltaEncode(prev,frame,indexDigits);data=b.length<a.length?b:a}out.push({ticks:1,data});prev=frame}return out
+}
+function luaLong(s){return`[[${s}]]`}
+function generateLua(settings,packetData){
+  const{width,height,fps,pixelSize,depth,addFrame,loop,x,y,z}=settings;
+  const A=1/fps,B=width*height<=4096?2:3;
+  const D=packetData.map(p=>luaLong(p.data)).join(','),T=packetData.map(p=>p.ticks).join(',');
+  return `-- SETTINGS\nlocal WIDTH=${width}\nlocal HEIGHT=${height}\nlocal FRAME_TIME=${A.toFixed(9)}\nlocal PIXEL_SIZE=${pixelSize}\nlocal PIXEL_DEPTH=${depth}\nlocal WORLD_X=${x}\nlocal WORLD_Y=${y}\nlocal WORLD_Z=${z}\nlocal LOOP=${loop?'true':'false'}\nlocal ADD_FRAME=${addFrame?'true':'false'}\n-- END SETTINGS\nlocal a=WIDTH;local b=HEIGHT;local c=FRAME_TIME;local d=PIXEL_SIZE;local e=PIXEL_DEPTH;local f=WORLD_X;local g=WORLD_Y;local h=WORLD_Z;local i=LOOP;local j=ADD_FRAME;local k=${B};local l=4;local m="${ALPHABET}";local n={${D}};local o={${T}};local p=workspace:FindFirstChild("VortexPixelVideo");if p then p:Destroy()end;local q=Instance.new("Model");q.Name="VortexPixelVideo";q.Parent=workspace;local r={};for s=1,string.len(m)do r[string.sub(m,s,s)]=s-1 end;local function t(u,v,w)local x=0;for y=0,w-1 do local z=string.sub(u,v+y,v+y);x=x*64+(r[z]or 0)end;return x end;local A0={};local function B0(C0)local D0=A0[C0];if D0 then return D0 end;local E0=t(C0,1,l);local F0=math.floor(E0/65536);local G0=E0%65536;local H0=math.floor(G0/256);local I0=G0%256;local J0=Color3.fromRGB(F0,H0,I0);A0[C0]=J0;return J0 end;local K0={};for L0=1,b do for M0=1,a do local N0=Instance.new("Part");N0.Name="P"..M0.."_"..L0;N0.Size=Vector3.new(d,d,e);N0.Position=Vector3.new(f+(M0-(a+1)/2)*d,g+((b+1)/2-L0)*d,h);N0.Anchored=true;N0.CanCollide=false;N0.CastShadow=false;N0.Color=Color3.fromRGB(0,0,0);N0.Parent=q;K0[#K0+1]=N0 end end;if j then local O0,P0=a*d,b*d;local function Q0(R0,S0,T0)local U0=Instance.new("Part");U0.Name=R0;U0.Size=S0;U0.Position=T0;U0.Anchored=true;U0.CanCollide=true;U0.CastShadow=false;U0.Color=Color3.fromRGB(8,10,14);U0.Parent=q end;Q0("T",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g+P0/2+.18,h));Q0("B",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g-P0/2-.18,h));Q0("L",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f-O0/2-.18,g,h));Q0("R",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f+O0/2+.18,g,h))end;local function V0(W0,X0)K0[W0].Color=B0(X0)end;local function Y0(Z0)local a1=string.sub(Z0,1,1);if a1=="F" then local b1,c1=1,2;while c1+l-1<=string.len(Z0)do V0(b1,string.sub(Z0,c1,c1+l-1));b1=b1+1;c1=c1+l end elseif a1=="R" then local d1,c1=1,2;local e1=l+2;while c1+e1-1<=string.len(Z0)do local f1=string.sub(Z0,c1,c1+l-1);local g1=t(Z0,c1+l,2);for h1=1,g1 do V0(d1,f1);d1=d1+1 end;c1=c1+e1 end elseif a1=="D" then local c1=2;local i1=k+l;while c1+i1-1<=string.len(Z0)do local j1=t(Z0,c1,k)+1;local k1=string.sub(Z0,c1+k,c1+k+l-1);V0(j1,k1);c1=c1+i1 end end end;repeat for l1=1,#n do Y0(n[l1]);task.wait(c*(o[l1]or 1))end until not i`;
+}
+
+async function convertVideo(){
+  if(!loadedFile||!video.videoWidth||converting)return;resetOutput();converting=true;cancelRequested=false;convertBtn.disabled=true;cancelBtn.classList.remove('hidden');
+  const width=Math.round(clamp(widthInput.value,4,160,56)),height=Math.round(clamp(heightInput.value,4,120,32)),timing=selectedTiming();
+  const fps=timing.fps,start=timing.start,span=timing.span,sourceCount=Math.max(1,timing.count);lastConverted={width,height,fps};temporalPrevRGB=null;scenePrevRGB=null;motionPrevRGB=null;sceneCutCount=0;detailBoostCount=0;motionSmoothCount=0;
+  setStatus(`Converting ${sourceCount.toLocaleString()} video frames…`);frames=new Array(sourceCount);
+  try{
+    for(let i=0;i<sourceCount;i++){
+      if(cancelRequested)throw new Error('__CANCELLED__');
+      const t=Math.min(start+Math.max(0,span-.001),start+i/fps);await seekVideo(Math.max(start,t));frames[i]=encodeCurrentFrame(width,height);
+      if(i===0||i===sourceCount-1||i%Math.max(1,Math.floor(fps/2))===0)decodeFrameToCanvas(frames[i],width,height);
+      setProgress((i+1)/sourceCount*84);setStatus(`Converting video frame ${(i+1).toLocaleString()} of ${sourceCount.toLocaleString()}…`);if(i%4===0)await yieldUI();
+    }
+    setStatus('Adding Vortex Video Converter end card…');const creditFrames=appendEndCredit(width,height,fps);frames.push(...creditFrames);setProgress(90);await yieldUI();
+    setStatus('Compressing for Vortex…');packets=makePackets(frames,width,height);setProgress(95);await yieldUI();
+    generatedLua=generateLua({width,height,fps,pixelSize:clamp(pixelSizeInput.value,.03,10,.35),depth:clamp(depthInput.value,.01,5,.12),addFrame:frameInput.checked,loop:loopInput.checked,x:Number(worldXInput.value)||0,y:Number(worldYInput.value)||12,z:Number(worldZInput.value)||0},packets);
+    codeOutput.value=generatedLua;scrubber.max=Math.max(0,frames.length-1);scrubber.value=0;scrubber.disabled=false;transportBtn.disabled=false;previewBtn.disabled=false;downloadBtn.disabled=false;copyBtn.disabled=false;decodeFrameToCanvas(frames[0],width,height);previewInfo.textContent='Vortex pixel preview';updateTimeLabel(0);setProgress(100);successBox.classList.add('show');successInfo.textContent=`${width}×${height} · 16.7M-color · ${frames.length.toLocaleString()} total frames · ${packets.length.toLocaleString()} compressed packets · ${sceneCutCount} scene cuts detected · detail boost ${detailBoostCount.toLocaleString()} frames · motion smoothing ${motionSmoothCount.toLocaleString()} frames`;setStatus('Done! End credit included. Download the Vortex .lua file.','good');
+  }catch(err){if(err&&err.message==='__CANCELLED__'){resetOutput();drawSourcePreview();setStatus('Conversion cancelled.','warn')}else{console.error(err);setStatus('Conversion failed: '+(err&&err.message?err.message:String(err)),'bad')}}
+  finally{converting=false;convertBtn.disabled=false;cancelBtn.classList.add('hidden')}
+}
+convertBtn.addEventListener('click',convertVideo);cancelBtn.addEventListener('click',()=>{cancelRequested=true;setStatus('Stopping after the current frame…','warn')});
+
+function updateTimeLabel(index){timeLabel.textContent=frames.length?`${index+1} / ${frames.length} · ${(index/lastConverted.fps).toFixed(2)}s`:'0 / 0 frames'}
+function showPreviewFrame(index){if(!frames.length)return;index=Math.max(0,Math.min(frames.length-1,index));decodeFrameToCanvas(frames[index],lastConverted.width,lastConverted.height);scrubber.value=index;updateTimeLabel(index)}
+function stopPreview(){previewRunning=false;if(previewRAF)cancelAnimationFrame(previewRAF);previewRAF=0;transportBtn.textContent='▶';previewBtn.textContent='Play preview'}
+function previewLoop(now){if(!previewRunning)return;const elapsed=(now-previewStart)/1000;let idx=previewBaseFrame+Math.floor(elapsed*lastConverted.fps);if(idx>=frames.length){if(loopInput.checked){previewBaseFrame=0;previewStart=now;idx=0}else{showPreviewFrame(frames.length-1);stopPreview();return}}showPreviewFrame(idx);previewRAF=requestAnimationFrame(previewLoop)}
+function startPreview(){if(!frames.length)return;stopPreview();previewRunning=true;previewBaseFrame=Number(scrubber.value)||0;previewStart=performance.now();transportBtn.textContent='Ⅱ';previewBtn.textContent='Restart preview';previewRAF=requestAnimationFrame(previewLoop)}
+previewBtn.addEventListener('click',startPreview);transportBtn.addEventListener('click',()=>previewRunning?stopPreview():startPreview());scrubber.addEventListener('input',()=>{stopPreview();showPreviewFrame(Number(scrubber.value)||0)});
+
+function downloadText(text,name){const blob=new Blob([text],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+downloadBtn.addEventListener('click',()=>{if(generatedLua)downloadText(generatedLua,`${safeName(loadedFile&&loadedFile.name)}_vortex_pixel_video.lua`)});
+copyBtn.addEventListener('click',async()=>{if(!generatedLua)return;try{await navigator.clipboard.writeText(generatedLua);setStatus('Script copied.','good')}catch{codeOutput.focus();codeOutput.select();setStatus('Clipboard blocked; the script is selected so you can copy it manually.','warn')}});
+
+previewCtx.fillStyle='#05070b';previewCtx.fillRect(0,0,previewCanvas.width,previewCanvas.height);previewCtx.fillStyle='#9ba8ba';previewCtx.font='22px system-ui';previewCtx.textAlign='center';previewCtx.fillText('Choose a video to begin',previewCanvas.width/2,previewCanvas.height/2);updateSummary();
+})();
+</script>
+</body>
+</html>
