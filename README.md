@@ -56,6 +56,16 @@ The converter now keeps 10 bits of precision per red, green, and blue channel th
 | Ultra | Maximum detail | **Very laggy — short clips only** |
 | Custom | Manual control | Depends on settings |
 
+## Vortex property-change safety
+
+Vortex can reject a task that queues too many property changes in a single engine frame. Generated scripts now build the screen in batches of **500 Parts** and yield between batches. They also include a **30,000 color-change** guard for unusually large custom screens.
+
+The generated Lua keeps these controls in the readable SETTINGS section:
+
+- `BUILD_PARTS_PER_STEP=500`
+- `MAX_COLOR_CHANGES_PER_STEP=30000`
+- `SAFE_YIELD_SECONDS=0.02`
+
 ## Performance tips
 
 Vortex has to update many colored Parts every frame. Higher resolution and higher FPS increase the workload quickly.
