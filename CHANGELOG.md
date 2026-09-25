@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.4.1
+- Fixed the Vortex runtime error: `script queued more than 50000 property changes in one frame`.
+- Part-screen construction now yields after every 500 Parts.
+- Added a 30,000 color-change safety guard for unusually large custom frames.
+- Added readable batching settings to generated Vortex Lua.
+
 ## v4.4
 - Added automatic portrait-video detection.
 - Presets now use portrait-friendly Part dimensions for vertical source videos.
