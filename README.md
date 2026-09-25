@@ -17,9 +17,11 @@ A browser-based tool that turns regular videos into animated **Vortex Part pixel
 ## What it includes
 
 - Video-to-Part pixel conversion
+- Automatic portrait-video detection and portrait-friendly Part layouts
 - Auto Vortex quality selection
 - Fast, Recommended, Better, High, Ultra, and Custom presets
-- 16.7M-color processing
+- 30-bit extended-color processing (10 bits per RGB channel)
+- Up to 1.07B representable RGB colors in the exported 30-bit color pipeline
 - Edge-preserving scaling
 - Temporal anti-flicker
 - Motion smoothing
@@ -33,6 +35,14 @@ A browser-based tool that turns regular videos into animated **Vortex Part pixel
 - Editable Vortex export settings
 - Obfuscated generated Vortex runtime code
 - Branded ending on every export: **Made with Vortex Video Converter**
+
+## Portrait videos
+
+Vertical videos are detected automatically. Auto Vortex and the built-in quality presets rotate their Part dimensions to preserve a portrait layout instead of forcing a landscape-sized screen.
+
+## Extended color
+
+The converter now keeps 10 bits of precision per red, green, and blue channel through its processed output, for up to 1,073,741,824 representable RGB values. Vortex supports normalized `Color3.new(R, G, B)` values from 0 to 1, which the generated player uses for the extended-color output.
 
 ## Quality presets
 
