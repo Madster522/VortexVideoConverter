@@ -198,7 +198,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
 <body>
 <main class="app">
   <div class="topbar">
-    <div class="brand"><div class="brandmark">V</div><div>Vortex Video Converter <span class="version">v4.3</span></div></div>
+    <div class="brand"><div class="brandmark">V</div><div>Vortex Video Converter <span class="version">v4.4</span></div></div>
     <nav class="nav" aria-label="Main navigation">
       <a href="#convert">Convert</a><a href="#preview">Preview</a><a href="#updates">Updates</a><a href="#credits">Credits</a><a href="https://github.com/Madster522/VortexVideoConverter" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -207,7 +207,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
     <div class="section-kicker">Video → animated Part screen</div>
     <h1>Vortex Video Converter</h1>
     <p>Turn almost any browser-playable video into a compressed animated Vortex Part screen. Auto Vortex picks the settings, HQ scaling keeps detail, and every export ends with a built-in creator credit.</p>
-    <div class="tagline"><span class="tag newtag">NEW · V4 quality engine</span><span class="tag">Local processing</span><span class="tag">Smart compression</span><span class="tag">16.7M colors</span></div>
+    <div class="tagline"><span class="tag newtag">NEW · V4 quality engine</span><span class="tag">Portrait auto-detect</span><span class="tag">30-bit extended color</span><span class="tag">Local processing</span><span class="tag">Smart compression</span></div>
     <div class="local">Your video stays on your device · nothing is uploaded</div>
   </header>
 
@@ -243,7 +243,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
     </div>
 
     <div class="summary">
-      <div class="pill"><b id="resolutionSummary">Auto</b><span>16.7M-color Part screen</span></div>
+      <div class="pill"><b id="resolutionSummary">Auto</b><span>Up to 1.07B-color Part screen</span></div>
       <div class="pill"><b id="partsSummary">1,792</b><span>Parts</span></div>
       <div class="pill"><b id="framesSummary">—</b><span>Frames</span></div>
       <div class="pill"><b id="durationSummary">—</b><span>Video length</span></div>
@@ -325,8 +325,9 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
 
   <section class="card" id="updates">
     <div class="section-kicker">Changelog</div>
-    <div class="step"><div class="num">↻</div><h2>Update log</h2><span>Vortex Video Converter v4.3</span></div>
-    <div class="release"><div class="release-badge">v4.3<br>Current</div><div><h3>GitHub + website polish</h3><p>Improved repository documentation, sharing metadata, keyboard focus visibility, reduced-motion support, and direct GitHub navigation without changing the converter workflow.</p></div></div>
+    <div class="step"><div class="num">↻</div><h2>Update log</h2><span>Vortex Video Converter v4.4</span></div>
+    <div class="release"><div class="release-badge">v4.4<br>Current</div><div><h3>Portrait + extended color</h3><p>Vertical videos are now detected automatically and presets use a portrait-friendly Part layout. The color pipeline now preserves 10-bit precision per RGB channel and exports with Color3.new for smoother gradients and more representable shades.</p></div></div>
+    <div class="release"><div class="release-badge">v4.3</div><div><h3>GitHub + website polish</h3><p>Improved repository documentation, sharing metadata, keyboard focus visibility, reduced-motion support, and direct GitHub navigation without changing the converter workflow.</p></div></div>
     <div class="release"><div class="release-badge">v4.2</div><div><h3>Scene-aware motion engine</h3><p>Added automatic scene/detail detection, motion smoothing for fast movement, and a live Vortex load meter that warns when settings may be laggy.</p></div></div>
     <div class="release"><div class="release-badge">v4.0<br>Current</div><div><h3>Website + branded end cards</h3><p>New full website layout, navigation, changelog, credits, improved help text, versioning, and a required “Made with Vortex Video Converter” ending added to every export. The ending is generated as real pixel frames, so it works on the same Part screen as the video.</p></div></div>
     <div class="release"><div class="release-badge">v3.2</div><div><h3>Higher quality video engine</h3><p>Added 24-bit color, gamma-correct supersampling, edge-preserving sharpening, temporal anti-flicker, and cleaner dark-scene handling.</p></div></div>
@@ -344,7 +345,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
     </div>
   </section>
 
-  <footer class="site-footer"><div><b>Vortex Video Converter v4.3</b> · Local-first video conversion</div><div>Made for Vortex creators · <a href="https://github.com/Madster522/VortexVideoConverter" target="_blank" rel="noopener" style="color:#9fc8f3">View on GitHub</a></div></footer>
+  <footer class="site-footer"><div><b>Vortex Video Converter v4.4</b> · Local-first video conversion</div><div>Made for Vortex creators · <a href="https://github.com/Madster522/VortexVideoConverter" target="_blank" rel="noopener" style="color:#9fc8f3">View on GitHub</a></div></footer>
 </main>
 <script>
 (() => {
@@ -394,6 +395,21 @@ for(let i=0;i<=4096;i++){const c=i/4096;const s=c<=0.0031308?12.92*c:1.055*Math.
 function linearToByte(v){return LINEAR_TO_SRGB[Math.max(0,Math.min(4096,Math.round(v*4096)))]}
 function luminance(r,g,b){return 0.2126*r+0.7152*g+0.0722*b}
 
+function isPortraitVideo(){
+  return !!(video.videoWidth&&video.videoHeight&&video.videoHeight>video.videoWidth);
+}
+function presetDimensions(longEdge){
+  const aspect=video.videoWidth&&video.videoHeight?video.videoWidth/video.videoHeight:16/9;
+  let w,h;
+  if(aspect<1){
+    h=Math.max(4,Math.min(120,Math.round(longEdge)));
+    w=Math.max(4,Math.min(160,Math.round(h*aspect)));
+  }else{
+    w=Math.max(4,Math.min(160,Math.round(longEdge)));
+    h=Math.max(4,Math.min(120,Math.round(w/aspect)));
+  }
+  return{w,h};
+}
 function autoHeight(width){
   const ratio=video.videoWidth&&video.videoHeight?video.videoHeight/video.videoWidth:9/16;
   return Math.max(4,Math.min(120,Math.round(width*ratio)));
@@ -409,23 +425,26 @@ function autoVortexSettings(){
   else if(dur>8){fps=20;targetUpdates=60000}
   else{fps=24;targetUpdates=72000}
   const targetParts=Math.max(600,targetUpdates/fps);
-  let w=Math.sqrt(targetParts*Math.max(0.25,aspect));
-  w=Math.round(Math.max(40,Math.min(104,w)));
-  if(video.videoWidth)w=Math.min(w,Math.max(40,video.videoWidth));
-  const h=Math.max(4,Math.min(120,Math.round(w/Math.max(0.1,aspect))));
-  return{w,h,fps,updates:Math.round(w*h*fps)};
+  let w=Math.sqrt(targetParts*Math.max(0.12,aspect));
+  let h=w/Math.max(0.08,aspect);
+  w=Math.round(Math.max(24,Math.min(112,w)));
+  h=Math.round(Math.max(24,Math.min(120,h)));
+  if(video.videoWidth)w=Math.min(w,Math.max(4,video.videoWidth));
+  if(video.videoHeight)h=Math.min(h,Math.max(4,video.videoHeight));
+  return{w,h,fps,updates:Math.round(w*h*fps),portrait:aspect<1};
 }
 function applyPreset(name){
   if(name==='custom')return;
   if(name==='auto'){
     const p=autoVortexSettings();
     widthInput.value=p.w;heightInput.value=p.h;fpsInput.value=p.fps;
-    autoChoiceLabel.textContent=`Auto chose ${p.w}×${p.h} @ ${p.fps} FPS · ~${p.updates.toLocaleString()} pixel updates/sec`;
+    autoChoiceLabel.textContent=`Auto chose ${p.w}×${p.h} @ ${p.fps} FPS · ${p.portrait?'portrait · ':''}~${p.updates.toLocaleString()} pixel updates/sec`;
     updateSummary();return;
   }
   const p=presets[name]||presets.recommended;
-  widthInput.value=p.w;heightInput.value=autoHeight(p.w);fpsInput.value=p.fps;
-  autoChoiceLabel.textContent='Manual quality preset';
+  const dims=presetDimensions(p.w);
+  widthInput.value=dims.w;heightInput.value=dims.h;fpsInput.value=p.fps;
+  autoChoiceLabel.textContent=isPortraitVideo()?'Portrait video detected · preset rotated automatically':'Manual quality preset';
   updateSummary();
 }
 qualitySelect.addEventListener('change',()=>applyPreset(qualitySelect.value));
@@ -488,7 +507,7 @@ function resetOutput(){
 async function loadFile(file){
   if(!file)return;resetOutput();loadedFile=file;if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(file);video.src=objectUrl;fileLine.textContent=file.name;sourceInfo.textContent='Loading…';setStatus('Reading video…');
   try{await new Promise((resolve,reject)=>{const ok=()=>{cleanup();resolve()};const bad=()=>{cleanup();reject(new Error('Your browser could not open this video format.'))};const cleanup=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('error',bad)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('error',bad,{once:true});video.load()});
-    sourceInfo.textContent=`${video.videoWidth}×${video.videoHeight} · ${video.duration.toFixed(2)}s`;if(qualitySelect.value!=='custom')applyPreset(qualitySelect.value);else updateSummary();convertBtn.disabled=false;drawSourcePreview();setStatus('Ready. Press “Convert video to Vortex”.','good');
+    sourceInfo.textContent=`${video.videoWidth}×${video.videoHeight} · ${video.duration.toFixed(2)}s${isPortraitVideo()?' · Portrait auto':''}`;if(qualitySelect.value!=='custom')applyPreset(qualitySelect.value);else updateSummary();convertBtn.disabled=false;drawSourcePreview();setStatus(isPortraitVideo()?'Ready · portrait layout detected automatically. Press “Convert video to Vortex”.':'Ready. Press “Convert video to Vortex”.','good');
   }catch(e){loadedFile=null;convertBtn.disabled=true;sourceInfo.textContent='Could not load';setStatus(e.message,'bad')}
 }
 fileInput.addEventListener('change',e=>loadFile(e.target.files&&e.target.files[0]));
@@ -507,13 +526,13 @@ function drawSourcePreview(){if(!video.videoWidth||frames.length)return;previewC
 
 function seekVideo(t){return new Promise((resolve,reject)=>{if(Math.abs(video.currentTime-t)<.0005){resolve();return}const done=()=>{cleanup();resolve()};const fail=()=>{cleanup();reject(new Error('Could not seek through the video.'))};const cleanup=()=>{video.removeEventListener('seeked',done);video.removeEventListener('error',fail)};video.addEventListener('seeked',done,{once:true});video.addEventListener('error',fail,{once:true});video.currentTime=t})}
 
-// 24-bit RGB: true 8-bit red, green, and blue (16.7 million colors).
-// Four compact Base64-style characters store each pixel.
-const COLOR_DIGITS=4;
-function quantize24(r,g,b){
-  return Math.max(0,Math.min(255,Math.round(r)))*65536+
-         Math.max(0,Math.min(255,Math.round(g)))*256+
-         Math.max(0,Math.min(255,Math.round(b)));
+// 30-bit RGB: 10 bits per channel (up to 1,073,741,824 representable colors).
+// Five Base64-style characters store each pixel. The extra precision preserves
+// intermediate shades created by scaling, smoothing, and anti-flicker.
+const COLOR_DIGITS=5;
+function quantizeColor(r,g,b){
+  const q=v=>Math.max(0,Math.min(1023,Math.round((Math.max(0,Math.min(255,v))/255)*1023)));
+  return q(r)*1048576+q(g)*1024+q(b);
 }
 function colorToken(v){return encodeNum(v,COLOR_DIGITS)}
 function tokenValue(frame,offset){let n=0;for(let i=0;i<COLOR_DIGITS;i++)n=n*64+Math.max(0,ALPHABET.indexOf(frame[offset+i]));return n}
@@ -534,7 +553,7 @@ function buildHighQualityRGB(width,height){
     if('imageSmoothingQuality' in sampleCtx)sampleCtx.imageSmoothingQuality='high';
     drawVideoToContext(sampleCtx,sampleCanvas);
     const d=sampleCtx.getImageData(0,0,width,height).data;
-    const rgb=new Uint8Array(width*height*3);
+    const rgb=new Float32Array(width*height*3);
     for(let p=0,i=0;p<width*height;p++,i+=4){rgb[p*3]=d[i];rgb[p*3+1]=d[i+1];rgb[p*3+2]=d[i+2]}
     return rgb;
   }
@@ -564,10 +583,10 @@ function buildHighQualityRGB(width,height){
     }
   }
 
-  if(!edgePreserveInput.checked)return Uint8Array.from(base);
+  if(!edgePreserveInput.checked)return base;
 
   // Edge-aware unsharp pass: strong local edges get more sharpening; flat regions stay clean.
-  const out=new Uint8Array(width*height*3);
+  const out=new Float32Array(width*height*3);
   for(let y=0;y<height;y++){
     for(let x=0;x<width;x++){
       const p=(y*width+x)*3;
@@ -581,9 +600,9 @@ function buildHighQualityRGB(width,height){
       const cr=base[p],cg=base[p+1],cb=base[p+2];
       const edge=Math.min(1,Math.abs(luminance(cr,cg,cb)-luminance(nr,ng,nb))/34);
       const amount=0.18+0.42*edge;
-      out[p]=Math.max(0,Math.min(255,Math.round(cr+(cr-nr)*amount)));
-      out[p+1]=Math.max(0,Math.min(255,Math.round(cg+(cg-ng)*amount)));
-      out[p+2]=Math.max(0,Math.min(255,Math.round(cb+(cb-nb)*amount)));
+      out[p]=Math.max(0,Math.min(255,cr+(cr-nr)*amount));
+      out[p+1]=Math.max(0,Math.min(255,cg+(cg-ng)*amount));
+      out[p+2]=Math.max(0,Math.min(255,cb+(cb-nb)*amount));
     }
   }
   return out;
@@ -591,7 +610,7 @@ function buildHighQualityRGB(width,height){
 
 function analyzeSceneAndDetail(rgb,width,height){
   if(!sceneDetectInput.checked){
-    scenePrevRGB=Uint8Array.from(rgb);
+    scenePrevRGB=Float32Array.from(rgb);
     return{cut:false,detail:0,motion:0};
   }
   let grad=0,gradN=0,motion=0,motionN=0;
@@ -610,7 +629,7 @@ function analyzeSceneAndDetail(rgb,width,height){
   }
   const detail=grad/(gradN||1),avgMotion=motion/(motionN||1);
   const cut=!!scenePrevRGB&&avgMotion>72;
-  scenePrevRGB=Uint8Array.from(rgb);
+  scenePrevRGB=Float32Array.from(rgb);
   if(cut)sceneCutCount++;
   return{cut,detail,motion:avgMotion};
 }
@@ -619,7 +638,7 @@ function applyAdaptiveDetailBoost(rgb,width,height,metrics){
   if(!sceneDetectInput.checked||metrics.cut||metrics.detail<10)return rgb;
   const strength=Math.min(.28,Math.max(.06,(metrics.detail-10)/75));
   if(strength<=.06)return rgb;
-  const out=new Uint8Array(rgb.length);
+  const out=new Float32Array(rgb.length);
   for(let y=0;y<height;y++){
     for(let x=0;x<width;x++){
       const p=(y*width+x)*3;
@@ -629,9 +648,9 @@ function applyAdaptiveDetailBoost(rgb,width,height,metrics){
       if(y>0){const q=p-width*3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
       if(y+1<height){const q=p+width*3;ar+=rgb[q];ag+=rgb[q+1];ab+=rgb[q+2];n++}
       ar/=n||1;ag/=n||1;ab/=n||1;
-      out[p]=Math.max(0,Math.min(255,Math.round(rgb[p]+(rgb[p]-ar)*strength)));
-      out[p+1]=Math.max(0,Math.min(255,Math.round(rgb[p+1]+(rgb[p+1]-ag)*strength)));
-      out[p+2]=Math.max(0,Math.min(255,Math.round(rgb[p+2]+(rgb[p+2]-ab)*strength)));
+      out[p]=Math.max(0,Math.min(255,rgb[p]+(rgb[p]-ar)*strength));
+      out[p+1]=Math.max(0,Math.min(255,rgb[p+1]+(rgb[p+1]-ag)*strength));
+      out[p+2]=Math.max(0,Math.min(255,rgb[p+2]+(rgb[p+2]-ab)*strength));
     }
   }
   detailBoostCount++;
@@ -640,9 +659,9 @@ function applyAdaptiveDetailBoost(rgb,width,height,metrics){
 
 function applyMotionSmoothing(rgb,width,height,metrics){
   if(!motionSmoothInput.checked||metrics.cut||!motionPrevRGB||motionPrevRGB.length!==rgb.length){
-    motionPrevRGB=Uint8Array.from(rgb);return rgb;
+    motionPrevRGB=Float32Array.from(rgb);return rgb;
   }
-  const out=new Uint8Array(rgb.length);
+  const out=new Float32Array(rgb.length);
   let used=false;
   for(let i=0;i<rgb.length;i+=3){
     const dr=rgb[i]-motionPrevRGB[i],dg=rgb[i+1]-motionPrevRGB[i+1],db=rgb[i+2]-motionPrevRGB[i+2];
@@ -653,9 +672,9 @@ function applyMotionSmoothing(rgb,width,height,metrics){
     else if(diff>=85&&diff<145)prevWeight=.08;
     else if(diff>=145&&metrics.motion<68)prevWeight=.045;
     if(prevWeight>0)used=true;
-    out[i]=Math.round(rgb[i]*(1-prevWeight)+motionPrevRGB[i]*prevWeight);
-    out[i+1]=Math.round(rgb[i+1]*(1-prevWeight)+motionPrevRGB[i+1]*prevWeight);
-    out[i+2]=Math.round(rgb[i+2]*(1-prevWeight)+motionPrevRGB[i+2]*prevWeight);
+    out[i]=rgb[i]*(1-prevWeight)+motionPrevRGB[i]*prevWeight;
+    out[i+1]=rgb[i+1]*(1-prevWeight)+motionPrevRGB[i+1]*prevWeight;
+    out[i+2]=rgb[i+2]*(1-prevWeight)+motionPrevRGB[i+2]*prevWeight;
   }
   motionPrevRGB=Uint8Array.from(out);
   if(used)motionSmoothCount++;
@@ -664,9 +683,9 @@ function applyMotionSmoothing(rgb,width,height,metrics){
 
 function applyTemporalAntiFlicker(rgb){
   if(!antiFlickerInput.checked||!temporalPrevRGB||temporalPrevRGB.length!==rgb.length){
-    temporalPrevRGB=Uint8Array.from(rgb);return rgb;
+    temporalPrevRGB=Float32Array.from(rgb);return rgb;
   }
-  const out=new Uint8Array(rgb.length);
+  const out=new Float32Array(rgb.length);
   for(let i=0;i<rgb.length;i+=3){
     const dr=rgb[i]-temporalPrevRGB[i],dg=rgb[i+1]-temporalPrevRGB[i+1],db=rgb[i+2]-temporalPrevRGB[i+2];
     const diff=Math.sqrt(dr*dr+dg*dg+db*db);
@@ -675,9 +694,9 @@ function applyTemporalAntiFlicker(rgb){
     if(diff<10)keep=0.58;
     else if(diff<22)keep=0.40;
     else if(diff<40)keep=0.18;
-    out[i]=Math.round(rgb[i]*(1-keep)+temporalPrevRGB[i]*keep);
-    out[i+1]=Math.round(rgb[i+1]*(1-keep)+temporalPrevRGB[i+1]*keep);
-    out[i+2]=Math.round(rgb[i+2]*(1-keep)+temporalPrevRGB[i+2]*keep);
+    out[i]=rgb[i]*(1-keep)+temporalPrevRGB[i]*keep;
+    out[i+1]=rgb[i+1]*(1-keep)+temporalPrevRGB[i+1]*keep;
+    out[i+2]=rgb[i+2]*(1-keep)+temporalPrevRGB[i+2]*keep;
   }
   temporalPrevRGB=Uint8Array.from(out);
   return out;
@@ -692,15 +711,16 @@ function encodeCurrentFrame(width,height){
   rgb=applyTemporalAntiFlicker(rgb);
   const out=new Array(width*height);
   if(!ditherInput.checked){
-    for(let p=0;p<width*height;p++)out[p]=colorToken(quantize24(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
+    for(let p=0;p<width*height;p++)out[p]=colorToken(quantizeColor(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
     return out.join('');
   }
   // Optional dithering remains available, but 24-bit color usually makes it unnecessary.
   const work=new Float32Array(rgb.length);for(let i=0;i<rgb.length;i++)work[i]=rgb[i];
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     const p=y*width+x,k=p*3;
-    const r=Math.max(0,Math.min(255,Math.round(work[k]))),g=Math.max(0,Math.min(255,Math.round(work[k+1]))),b=Math.max(0,Math.min(255,Math.round(work[k+2])));
-    out[p]=colorToken(quantize24(r,g,b));
+    const snap=v=>Math.round(Math.max(0,Math.min(255,v))*1023/255)*255/1023;
+    const r=snap(work[k]),g=snap(work[k+1]),b=snap(work[k+2]);
+    out[p]=colorToken(quantizeColor(r,g,b));
     const er=work[k]-r,eg=work[k+1]-g,eb=work[k+2]-b;
     const add=(nx,ny,f)=>{if(nx<0||nx>=width||ny<0||ny>=height)return;const q=(ny*width+nx)*3;work[q]+=er*f;work[q+1]+=eg*f;work[q+2]+=eb*f};
     add(x+1,y,7/16);add(x-1,y+1,3/16);add(x,y+1,5/16);add(x+1,y+1,1/16);
@@ -710,7 +730,7 @@ function encodeCurrentFrame(width,height){
 
 function encodeRGBArray(rgb,width,height){
   const out=new Array(width*height);
-  for(let p=0;p<width*height;p++)out[p]=colorToken(quantize24(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
+  for(let p=0;p<width*height;p++)out[p]=colorToken(quantizeColor(rgb[p*3],rgb[p*3+1],rgb[p*3+2]));
   return out.join('');
 }
 
@@ -765,7 +785,7 @@ function appendEndCredit(width,height,fps){
 
 function decodeFrameToCanvas(frame,width,height){
   previewCanvas.width=width;previewCanvas.height=height;const img=previewCtx.createImageData(width,height),pixelCount=width*height;
-  for(let p=0;p<pixelCount;p++){const v=tokenValue(frame,p*COLOR_DIGITS),r=Math.floor(v/65536),rem=v%65536,g=Math.floor(rem/256),b=rem%256,j=p*4;img.data[j]=r;img.data[j+1]=g;img.data[j+2]=b;img.data[j+3]=255}
+  for(let p=0;p<pixelCount;p++){const v=tokenValue(frame,p*COLOR_DIGITS),r10=Math.floor(v/1048576),rem=v%1048576,g10=Math.floor(rem/1024),b10=rem%1024,j=p*4;img.data[j]=Math.round(r10*255/1023);img.data[j+1]=Math.round(g10*255/1023);img.data[j+2]=Math.round(b10*255/1023);img.data[j+3]=255}
   previewCtx.putImageData(img,0,0)
 }
 
@@ -781,7 +801,7 @@ function generateLua(settings,packetData){
   const{width,height,fps,pixelSize,depth,addFrame,loop,x,y,z}=settings;
   const A=1/fps,B=width*height<=4096?2:3;
   const D=packetData.map(p=>luaLong(p.data)).join(','),T=packetData.map(p=>p.ticks).join(',');
-  return `-- SETTINGS\nlocal WIDTH=${width}\nlocal HEIGHT=${height}\nlocal FRAME_TIME=${A.toFixed(9)}\nlocal PIXEL_SIZE=${pixelSize}\nlocal PIXEL_DEPTH=${depth}\nlocal WORLD_X=${x}\nlocal WORLD_Y=${y}\nlocal WORLD_Z=${z}\nlocal LOOP=${loop?'true':'false'}\nlocal ADD_FRAME=${addFrame?'true':'false'}\n-- END SETTINGS\nlocal a=WIDTH;local b=HEIGHT;local c=FRAME_TIME;local d=PIXEL_SIZE;local e=PIXEL_DEPTH;local f=WORLD_X;local g=WORLD_Y;local h=WORLD_Z;local i=LOOP;local j=ADD_FRAME;local k=${B};local l=4;local m="${ALPHABET}";local n={${D}};local o={${T}};local p=workspace:FindFirstChild("VortexPixelVideo");if p then p:Destroy()end;local q=Instance.new("Model");q.Name="VortexPixelVideo";q.Parent=workspace;local r={};for s=1,string.len(m)do r[string.sub(m,s,s)]=s-1 end;local function t(u,v,w)local x=0;for y=0,w-1 do local z=string.sub(u,v+y,v+y);x=x*64+(r[z]or 0)end;return x end;local A0={};local function B0(C0)local D0=A0[C0];if D0 then return D0 end;local E0=t(C0,1,l);local F0=math.floor(E0/65536);local G0=E0%65536;local H0=math.floor(G0/256);local I0=G0%256;local J0=Color3.fromRGB(F0,H0,I0);A0[C0]=J0;return J0 end;local K0={};for L0=1,b do for M0=1,a do local N0=Instance.new("Part");N0.Name="P"..M0.."_"..L0;N0.Size=Vector3.new(d,d,e);N0.Position=Vector3.new(f+(M0-(a+1)/2)*d,g+((b+1)/2-L0)*d,h);N0.Anchored=true;N0.CanCollide=false;N0.CastShadow=false;N0.Color=Color3.fromRGB(0,0,0);N0.Parent=q;K0[#K0+1]=N0 end end;if j then local O0,P0=a*d,b*d;local function Q0(R0,S0,T0)local U0=Instance.new("Part");U0.Name=R0;U0.Size=S0;U0.Position=T0;U0.Anchored=true;U0.CanCollide=true;U0.CastShadow=false;U0.Color=Color3.fromRGB(8,10,14);U0.Parent=q end;Q0("T",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g+P0/2+.18,h));Q0("B",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g-P0/2-.18,h));Q0("L",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f-O0/2-.18,g,h));Q0("R",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f+O0/2+.18,g,h))end;local function V0(W0,X0)K0[W0].Color=B0(X0)end;local function Y0(Z0)local a1=string.sub(Z0,1,1);if a1=="F" then local b1,c1=1,2;while c1+l-1<=string.len(Z0)do V0(b1,string.sub(Z0,c1,c1+l-1));b1=b1+1;c1=c1+l end elseif a1=="R" then local d1,c1=1,2;local e1=l+2;while c1+e1-1<=string.len(Z0)do local f1=string.sub(Z0,c1,c1+l-1);local g1=t(Z0,c1+l,2);for h1=1,g1 do V0(d1,f1);d1=d1+1 end;c1=c1+e1 end elseif a1=="D" then local c1=2;local i1=k+l;while c1+i1-1<=string.len(Z0)do local j1=t(Z0,c1,k)+1;local k1=string.sub(Z0,c1+k,c1+k+l-1);V0(j1,k1);c1=c1+i1 end end end;repeat for l1=1,#n do Y0(n[l1]);task.wait(c*(o[l1]or 1))end until not i`;
+  return `-- SETTINGS\nlocal WIDTH=${width}\nlocal HEIGHT=${height}\nlocal FRAME_TIME=${A.toFixed(9)}\nlocal PIXEL_SIZE=${pixelSize}\nlocal PIXEL_DEPTH=${depth}\nlocal WORLD_X=${x}\nlocal WORLD_Y=${y}\nlocal WORLD_Z=${z}\nlocal LOOP=${loop?'true':'false'}\nlocal ADD_FRAME=${addFrame?'true':'false'}\n-- END SETTINGS\nlocal a=WIDTH;local b=HEIGHT;local c=FRAME_TIME;local d=PIXEL_SIZE;local e=PIXEL_DEPTH;local f=WORLD_X;local g=WORLD_Y;local h=WORLD_Z;local i=LOOP;local j=ADD_FRAME;local k=${B};local l=5;local m="${ALPHABET}";local n={${D}};local o={${T}};local p=workspace:FindFirstChild("VortexPixelVideo");if p then p:Destroy()end;local q=Instance.new("Model");q.Name="VortexPixelVideo";q.Parent=workspace;local r={};for s=1,string.len(m)do r[string.sub(m,s,s)]=s-1 end;local function t(u,v,w)local x=0;for y=0,w-1 do local z=string.sub(u,v+y,v+y);x=x*64+(r[z]or 0)end;return x end;local A0={};local function B0(C0)local D0=A0[C0];if D0 then return D0 end;local E0=t(C0,1,l);local F0=math.floor(E0/1048576);local G0=E0%1048576;local H0=math.floor(G0/1024);local I0=G0%1024;local J0=Color3.new(F0/1023,H0/1023,I0/1023);A0[C0]=J0;return J0 end;local K0={};for L0=1,b do for M0=1,a do local N0=Instance.new("Part");N0.Name="P"..M0.."_"..L0;N0.Size=Vector3.new(d,d,e);N0.Position=Vector3.new(f+(M0-(a+1)/2)*d,g+((b+1)/2-L0)*d,h);N0.Anchored=true;N0.CanCollide=false;N0.CastShadow=false;N0.Color=Color3.fromRGB(0,0,0);N0.Parent=q;K0[#K0+1]=N0 end end;if j then local O0,P0=a*d,b*d;local function Q0(R0,S0,T0)local U0=Instance.new("Part");U0.Name=R0;U0.Size=S0;U0.Position=T0;U0.Anchored=true;U0.CanCollide=true;U0.CastShadow=false;U0.Color=Color3.fromRGB(8,10,14);U0.Parent=q end;Q0("T",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g+P0/2+.18,h));Q0("B",Vector3.new(O0+.5,.25,e+.1),Vector3.new(f,g-P0/2-.18,h));Q0("L",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f-O0/2-.18,g,h));Q0("R",Vector3.new(.25,P0+.5,e+.1),Vector3.new(f+O0/2+.18,g,h))end;local function V0(W0,X0)K0[W0].Color=B0(X0)end;local function Y0(Z0)local a1=string.sub(Z0,1,1);if a1=="F" then local b1,c1=1,2;while c1+l-1<=string.len(Z0)do V0(b1,string.sub(Z0,c1,c1+l-1));b1=b1+1;c1=c1+l end elseif a1=="R" then local d1,c1=1,2;local e1=l+2;while c1+e1-1<=string.len(Z0)do local f1=string.sub(Z0,c1,c1+l-1);local g1=t(Z0,c1+l,2);for h1=1,g1 do V0(d1,f1);d1=d1+1 end;c1=c1+e1 end elseif a1=="D" then local c1=2;local i1=k+l;while c1+i1-1<=string.len(Z0)do local j1=t(Z0,c1,k)+1;local k1=string.sub(Z0,c1+k,c1+k+l-1);V0(j1,k1);c1=c1+i1 end end end;repeat for l1=1,#n do Y0(n[l1]);task.wait(c*(o[l1]or 1))end until not i`;
 }
 
 async function convertVideo(){
@@ -799,7 +819,7 @@ async function convertVideo(){
     setStatus('Adding Vortex Video Converter end card…');const creditFrames=appendEndCredit(width,height,fps);frames.push(...creditFrames);setProgress(90);await yieldUI();
     setStatus('Compressing for Vortex…');packets=makePackets(frames,width,height);setProgress(95);await yieldUI();
     generatedLua=generateLua({width,height,fps,pixelSize:clamp(pixelSizeInput.value,.03,10,.35),depth:clamp(depthInput.value,.01,5,.12),addFrame:frameInput.checked,loop:loopInput.checked,x:Number(worldXInput.value)||0,y:Number(worldYInput.value)||12,z:Number(worldZInput.value)||0},packets);
-    codeOutput.value=generatedLua;scrubber.max=Math.max(0,frames.length-1);scrubber.value=0;scrubber.disabled=false;transportBtn.disabled=false;previewBtn.disabled=false;downloadBtn.disabled=false;copyBtn.disabled=false;decodeFrameToCanvas(frames[0],width,height);previewInfo.textContent='Vortex pixel preview';updateTimeLabel(0);setProgress(100);successBox.classList.add('show');successInfo.textContent=`${width}×${height} · 16.7M-color · ${frames.length.toLocaleString()} total frames · ${packets.length.toLocaleString()} compressed packets · ${sceneCutCount} scene cuts detected · detail boost ${detailBoostCount.toLocaleString()} frames · motion smoothing ${motionSmoothCount.toLocaleString()} frames`;setStatus('Done! End credit included. Download the Vortex .lua file.','good');
+    codeOutput.value=generatedLua;scrubber.max=Math.max(0,frames.length-1);scrubber.value=0;scrubber.disabled=false;transportBtn.disabled=false;previewBtn.disabled=false;downloadBtn.disabled=false;copyBtn.disabled=false;decodeFrameToCanvas(frames[0],width,height);previewInfo.textContent='Vortex pixel preview';updateTimeLabel(0);setProgress(100);successBox.classList.add('show');successInfo.textContent=`${width}×${height} · 30-bit color · ${frames.length.toLocaleString()} total frames · ${packets.length.toLocaleString()} compressed packets · ${sceneCutCount} scene cuts detected · detail boost ${detailBoostCount.toLocaleString()} frames · motion smoothing ${motionSmoothCount.toLocaleString()} frames`;setStatus('Done! End credit included. Download the Vortex .lua file.','good');
   }catch(err){if(err&&err.message==='__CANCELLED__'){resetOutput();drawSourcePreview();setStatus('Conversion cancelled.','warn')}else{console.error(err);setStatus('Conversion failed: '+(err&&err.message?err.message:String(err)),'bad')}}
   finally{converting=false;convertBtn.disabled=false;cancelBtn.classList.add('hidden')}
 }
