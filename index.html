@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Vortex Video Converter — Turn videos into Vortex Part screens</title>
 <meta name="description" content="Convert videos into animated Vortex Part screens locally in your browser. High-quality scaling, anti-flicker, automatic Vortex settings, smart compression, and a built-in end credit." />
+<meta name="robots" content="index,follow" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Vortex Video Converter" />
+<meta property="og:description" content="Convert browser-playable videos into animated Vortex Part screens locally in your browser." />
+<meta property="og:url" content="https://github.com/Madster522/VortexVideoConverter" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Vortex Video Converter" />
+<meta name="twitter:description" content="Local video-to-Vortex Part screen conversion with smart compression and high-quality scaling." />
 <meta name="theme-color" content="#070a0f" />
 <style>
 :root{
@@ -13,6 +21,9 @@
   --accent:#4aa8ff;--accent2:#7a6cff;--good:#5bd79d;--warn:#ffd166;--bad:#ff7b7b;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
+:focus-visible{outline:3px solid rgba(74,168,255,.72);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 body{margin:0;background:linear-gradient(180deg,#0b1220,#070a0f 42%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input,select{font:inherit}
 .app{width:min(980px,94vw);margin:24px auto 48px}
@@ -187,9 +198,9 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
 <body>
 <main class="app">
   <div class="topbar">
-    <div class="brand"><div class="brandmark">V</div><div>Vortex Video Converter <span class="version">v4.2</span></div></div>
+    <div class="brand"><div class="brandmark">V</div><div>Vortex Video Converter <span class="version">v4.3</span></div></div>
     <nav class="nav" aria-label="Main navigation">
-      <a href="#convert">Convert</a><a href="#preview">Preview</a><a href="#updates">Updates</a><a href="#credits">Credits</a>
+      <a href="#convert">Convert</a><a href="#preview">Preview</a><a href="#updates">Updates</a><a href="#credits">Credits</a><a href="https://github.com/Madster522/VortexVideoConverter" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </div>
   <header class="hero">
@@ -274,7 +285,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
     <div class="step"><div class="num">3</div><h2>Convert and download</h2><span>One click</span></div>
     <button class="primary" id="convertBtn" disabled>Convert video to Vortex</button>
     <button class="secondary hidden" id="cancelBtn" type="button" style="width:100%;margin-top:8px">Cancel</button>
-    <div class="status" id="status">Choose a video first.</div>
+    <div class="status" id="status" role="status" aria-live="polite">Choose a video first.</div>
     <div class="progress"><div id="progressBar"></div></div>
 
     <div class="success" id="successBox">
@@ -314,7 +325,8 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
 
   <section class="card" id="updates">
     <div class="section-kicker">Changelog</div>
-    <div class="step"><div class="num">↻</div><h2>Update log</h2><span>Vortex Video Converter v4.2</span></div>
+    <div class="step"><div class="num">↻</div><h2>Update log</h2><span>Vortex Video Converter v4.3</span></div>
+    <div class="release"><div class="release-badge">v4.3<br>Current</div><div><h3>GitHub + website polish</h3><p>Improved repository documentation, sharing metadata, keyboard focus visibility, reduced-motion support, and direct GitHub navigation without changing the converter workflow.</p></div></div>
     <div class="release"><div class="release-badge">v4.2</div><div><h3>Scene-aware motion engine</h3><p>Added automatic scene/detail detection, motion smoothing for fast movement, and a live Vortex load meter that warns when settings may be laggy.</p></div></div>
     <div class="release"><div class="release-badge">v4.0<br>Current</div><div><h3>Website + branded end cards</h3><p>New full website layout, navigation, changelog, credits, improved help text, versioning, and a required “Made with Vortex Video Converter” ending added to every export. The ending is generated as real pixel frames, so it works on the same Part screen as the video.</p></div></div>
     <div class="release"><div class="release-badge">v3.2</div><div><h3>Higher quality video engine</h3><p>Added 24-bit color, gamma-correct supersampling, edge-preserving sharpening, temporal anti-flicker, and cleaner dark-scene handling.</p></div></div>
@@ -332,7 +344,7 @@ textarea{background:#060a10;border-color:#2c4059;border-radius:12px}
     </div>
   </section>
 
-  <footer class="site-footer"><div><b>Vortex Video Converter v4.2</b> · Local-first video conversion</div><div>Made for Vortex creators · No upload required</div></footer>
+  <footer class="site-footer"><div><b>Vortex Video Converter v4.3</b> · Local-first video conversion</div><div>Made for Vortex creators · <a href="https://github.com/Madster522/VortexVideoConverter" target="_blank" rel="noopener" style="color:#9fc8f3">View on GitHub</a></div></footer>
 </main>
 <script>
 (() => {
