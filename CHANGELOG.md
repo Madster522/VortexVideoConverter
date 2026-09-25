@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.4
+- Added automatic portrait-video detection.
+- Presets now use portrait-friendly Part dimensions for vertical source videos.
+- Upgraded the processed/export color pipeline to 30-bit RGB (10 bits per channel).
+- Preserved fractional color precision through scaling, motion smoothing, and anti-flicker.
+- Generated Vortex playback now uses normalized `Color3.new` values for extended color.
+
 ## v4.3
 - Improved GitHub repository documentation.
 - Added better social/share metadata to the website.
